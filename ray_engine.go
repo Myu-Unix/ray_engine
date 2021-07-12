@@ -39,16 +39,16 @@ var (
 	mapX            int     = 8
 	mapY            int     = 8
 	boot                    = 56
-	mouse_enabled 	int 	= 0
-	engine_version          = "ray_engine 0.5.7"
+	mouse_enabled	int	= 0
+	engine_version          = "ray_engine 0.5.7.1"
 	debug_str               = "'z/s/q/d' (Azerty) to move, 'k' to exit"
 	str             string
 	map_array = [64]int{
 		1, 1, 1, 1, 1, 1, 1, 1,
-		1, 0, 1, 0, 0, 1, 0, 1,
-		1, 0, 1, 0, 0, 0, 0, 1,
+		1, 0, 0, 0, 0, 1, 1, 1,
 		1, 0, 0, 0, 0, 0, 0, 1,
-		1, 0, 0, 0, 0, 1, 0, 1,
+		1, 0, 0, 0, 0, 1, 1, 1,
+		1, 0, 0, 0, 0, 0, 0, 1,
 		1, 0, 0, 0, 0, 0, 0, 1,
 		1, 0, 1, 0, 0, 0, 0, 1,
 		1, 1, 1, 1, 1, 1, 1, 1,
@@ -69,7 +69,7 @@ var (
 )
 
 //fix fisheye effect
-func fix_fisheye() { 
+func fix_fisheye() {
   ca = player_angle - ra
   if ca < 0 {
    ca = ca + (2 * CONST_PI)
@@ -208,7 +208,7 @@ func cast_rays(screen *ebiten.Image) {
 		// x, y, rayx8, lineH
 		ebitenutil.DrawRect(screen, float64(x3d), float64(lineO), float64(8), lineH+lineO, color.RGBA{COLOR_R, COLOR_G, COLOR_B, 255})
 
-		x3d = x3d + 8	
+		x3d = x3d + 8
 	}
 	x3d = 530
 }
@@ -338,7 +338,7 @@ func update(screen *ebiten.Image) error {
 		if show_debug == 0 {
           show_debug = 1
 	    } else {
-	      show_debug = 0	
+	      show_debug = 0
 	    }
 	}
 	if IsKeyTriggered(ebiten.KeyF) == true {
