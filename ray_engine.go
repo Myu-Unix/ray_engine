@@ -31,6 +31,7 @@ var (
 	CONST_PI2       float64 = CONST_PI / 2
 	CONST_PI3       float64 = 3 * (CONST_PI / 2)
 	CONST_DR        float64 = 0.0174533 // one radian in degrees
+	//CONST_2D_MAP_BLOC_SIZE float64 = 64
 	player_pos_x    float64 = 220
 	player_pos_y    float64 = 320
 	player_delta_x  float64 = 0
@@ -39,20 +40,21 @@ var (
 	mapX            int     = 8
 	mapY            int     = 8
 	boot                    = 56
-	mouse_enabled	int	= 0
-	engine_version          = "ray_engine 0.5.7.1"
-	debug_str               = "'z/s/q/d' (Azerty) to move, 'k' to exit"
+	STATE_SHOW_2D_MAP = 1
+	engine_version          = "ray_engine 0.5.8"
+	debug_str               = "'z/s/q/d' (Azerty) to move, 'k' to exit, 'm' to draw the 2D map"
 	str             string
 	map_array = [64]int{
 		1, 1, 1, 1, 1, 1, 1, 1,
 		1, 0, 0, 0, 0, 1, 1, 1,
-		1, 0, 0, 0, 0, 0, 0, 1,
-		1, 0, 0, 0, 0, 1, 1, 1,
+		1, 0, 1, 0, 0, 1, 0, 1,
+		1, 1, 0, 0, 0, 1, 0, 1,
 		1, 0, 0, 0, 0, 0, 0, 1,
 		1, 0, 0, 0, 0, 0, 0, 1,
 		1, 0, 1, 0, 0, 0, 0, 1,
 		1, 1, 1, 1, 1, 1, 1, 1,
 	}
+
 	// Rays vars
 	r, mx, my, mp, dof                 int
 	rx, ry, ra, xo, yo, hx, hy, vx, vy float64
@@ -63,7 +65,8 @@ var (
 	disT                               float64 = 0
 	lineH                              float64 = 0
 	lineO                              float64 = 0
-	x3d float64	= 530 // Offset to start to draw the 3D map
+	x3d float64	= 530 // Current offset to start to draw the 3D map
+	x3d_orig float64 = 530 // Offset toogle - 0 = 2D MAP on, 530 = 2D MAP Off - set at compile time
 	ca float64 = 0
 	COLOR_R, COLOR_G, COLOR_B uint8
 )
@@ -81,7 +84,7 @@ func fix_fisheye() {
 }
 
 func cast_horiz() {
-			dof = 0
+		dof = 0
 		hx = player_pos_x
 		hy = player_pos_y
 		aTan = -1 / math.Tan(ra)
@@ -97,6 +100,7 @@ func cast_horiz() {
 			yo = 64
 			xo = -yo * aTan
 		}
+		// Looking left or right, will not hit horizontal lines
 		if ra == 0 || ra == CONST_PI {
 			rx = player_pos_x
 			ry = player_pos_y
@@ -106,7 +110,7 @@ func cast_horiz() {
 			mx = (int(rx) >> 6)
 			my = (int(ry) >> 6)
 			mp = my*mapX + mx
-			if (mp > 0 && mp < mapX*mapY) && map_array[mp] == 1 {
+			if (mp > 0 && mp < mapX*mapY) && map_array[mp] > 0 { // was == 1
 				dof = 8 // hit wall
 				hx = rx
 				hy = ry
@@ -146,7 +150,7 @@ dof = 0
 			mx = (int(rx) >> 6)
 			my = (int(ry) >> 6)
 			mp = my*mapX + mx
-			if (mp > 0 && mp < mapX*mapY) && map_array[mp] == 1 {
+			if (mp > 0 && mp < mapX*mapY) && map_array[mp] > 0 { // was == 1
 				dof = 8 // hit wall
 				vx = rx ; vy = ry
 				// ax ay bx by ang
@@ -157,18 +161,19 @@ dof = 0
 		}
 		if disV < disH {
 			rx = vx ; ry = vy ; disT = disV
-			COLOR_R = 192
+			/*COLOR_R = 192
 			COLOR_G = 0
-			COLOR_B = 0
-		}
-		if disH < disV {
+			COLOR_B = 50*/
+		} else if disH < disV {
 			rx = hx ; ry = hy ; disT = disH
-			COLOR_R = 249
-			COLOR_G = 3
-			COLOR_B = 0
+			/*COLOR_R = 248
+			COLOR_G = 0
+			COLOR_B = 50*/
 		}
 		// Draw Shortest ray based on disT in Orange
-		ebitenutil.DrawLine(screen, player_pos_x, player_pos_y, rx, ry, color.RGBA{255, 128, 0, 255})
+		if STATE_SHOW_2D_MAP == 1 {
+		  ebitenutil.DrawLine(screen, player_pos_x, player_pos_y, rx, ry, color.RGBA{255, 128, 0, 255})
+	  }
 		ra = (ra + CONST_DR)
 		if ra < 0 {
 			ra = ra + (2 * CONST_PI)
@@ -186,31 +191,52 @@ func cast_rays(screen *ebiten.Image) {
 	if ra > 2*CONST_PI {
 		ra = ra - 2*CONST_PI
 	}
-	for ray := 0; ray < 64; ray++ { // numbers of ray casted
+	for ray := 0; ray < 128; ray++ { // numbers of ray casted
 		// Horizontal lines
 		cast_horiz()
 		// Vertical lines + smallest line
 		cast_verti(screen)
-		// Draw 3D lines/map
+		// Fix fisheye effect
 		fix_fisheye()
 
+	  // Draw 3D lines/map
 		lineH = float64(64 * 320) / disT
 		if lineH > float64(320) {
 			lineH = float64(320)
 		}
 		// "dim" far objects
+		/*if lineH < float64(160) {
+			COLOR_R = 128
+			COLOR_G = 0
+			COLOR_B = 50
+		}
 		if lineH < float64(120) {
-			COLOR_R = 97
+			COLOR_R = 96
+			COLOR_G = 0
+			COLOR_B = 25
+		}
+		if lineH < float64(80) {
+			COLOR_R = 64
 			COLOR_G = 0
 			COLOR_B = 0
+		}*/
+		
+		// Dim 2.0 shader
+		COLOR_R=uint8(float64(lineH - 65))
+		if COLOR_R < 0 {
+			COLOR_R = 0
 		}
-		lineO = 160 - (lineH/float64(2.3)) // was 2 (int) but 2.x helps with perspective somehow
+		if COLOR_R> 255 {
+			COLOR_R = 255
+		}
+		COLOR_B=50
+
+		lineO = 160 - (lineH/float64(2.25)) // was 2 (int) but 2.x helps with perspective somehow
 		// x, y, rayx8, lineH
 		ebitenutil.DrawRect(screen, float64(x3d), float64(lineO), float64(8), lineH+lineO, color.RGBA{COLOR_R, COLOR_G, COLOR_B, 255})
-
 		x3d = x3d + 8
 	}
-	x3d = 530
+	x3d = x3d_orig
 }
 
 func update(screen *ebiten.Image) error {
@@ -232,7 +258,8 @@ func update(screen *ebiten.Image) error {
 		player_delta_y = math.Sin(player_angle) * 5
 	} else {
 		screen.DrawImage(backgroundImage, opBackground)
-		// Draw map
+		// Draw 2D map
+		if STATE_SHOW_2D_MAP == 1 {
 		for i := 0; i < mapX; i++ {
 			for j := 0; j < mapY; j++ {
 				if map_array[i*mapX+j] == 1 {
@@ -251,56 +278,41 @@ func update(screen *ebiten.Image) error {
 		}
 		wall_posx = 0
 		wall_posy = 0
-
 		// Draw player as a rect
 		ebitenutil.DrawRect(screen, float64(player_pos_x), float64(player_pos_y), 8, 8, color.Black)
 		ebitenutil.DrawRect(screen, float64(player_pos_x), float64(player_pos_y), 4, 4, color.RGBA{255, 100, 100, 255})
-
+    }
 		// Raycasting
 		cast_rays(screen)
 
 		// Draw player line of sight after raycast
 		// https://pkg.go.dev/github.com/hajimehoshi/ebiten/ebitenutil#DrawLine
-		ebitenutil.DrawLine(screen, player_pos_x, player_pos_y, player_pos_x+(player_delta_x*5), player_pos_y+(player_delta_y*5), color.RGBA{255, 255, 0, 255})
+		if STATE_SHOW_2D_MAP == 1 {
+		  ebitenutil.DrawLine(screen, player_pos_x, player_pos_y, player_pos_x+(player_delta_x*5), player_pos_y+(player_delta_y*5), color.RGBA{255, 255, 0, 255})
+		  //ebitenutil.DrawLine(screen, player_pos_x, player_pos_y, player_pos_x+(player_delta_x*2), player_pos_y+(player_delta_y*2), color.RGBA{255, 255, 0, 255})
+	  }
 
 		// Show debug info
 		str = `{{.newline}} {{.engine_version}} {{.newline}} {{.debug_str}} {{.newline}} {{.player_angle}}`
 		str = strings.Replace(str, "{{.engine_version}}", engine_version, -1)
 		str = strings.Replace(str, "{{.debug_str}}", debug_str, -1)
-		str = strings.Replace(str, "{{.newline}}", "\n                                                                                                                                ", -1)
+		str = strings.Replace(str, "{{.newline}}", "\n", -1)
 		str = strings.Replace(str, "{{.player_angle}}", fmt.Sprintf("Player angle : %f", player_angle), -1)
 		if show_debug == 1 {
 			ebitenutil.DebugPrint(screen, str)
 		}
-
 	}
 
-	// --- Dodgy AF Mouse support, disabled by default
-	if mouse_enabled == 1 {
-	x, _ := ebiten.CursorPosition()
-	fmt.Println("Mouse X : %f", x)
-	player_angle = float64(x)/48 // Influence mouse sensitivity
-	// reset
-	if player_angle < 0 {
-			player_angle = 6.283
-		}
-	if player_angle > 6.283 {
-			player_angle = 0
-		}
-	player_delta_x = math.Cos(player_angle) * 5
-	player_delta_y = math.Sin(player_angle) * 5
-	// ---
-	}
-
+	// Keyboard handling
 	if ebiten.IsKeyPressed(ebiten.KeyM) {
-		keyStates[ebiten.KeyM]++
+	  keyStates[ebiten.KeyM]++
 	} else {
 		keyStates[ebiten.KeyM] = 0
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyF) {
-            keyStates[ebiten.KeyF]++
-    } else {
-            keyStates[ebiten.KeyF] = 0
+    keyStates[ebiten.KeyF]++
+  } else {
+    keyStates[ebiten.KeyF] = 0
     }
 	if ebiten.IsKeyPressed(ebiten.KeyK) {
 		keyStates[ebiten.KeyK]++
@@ -319,7 +331,7 @@ func update(screen *ebiten.Image) error {
 	if ebiten.IsKeyPressed(ebiten.KeyA) { // Q Azerty
 		player_angle -= 0.05
 		// Reset
-		if player_angle < 0 {
+		if player_angle <= 0 {
 			player_angle = 6.283
 		}
 		player_delta_x = math.Cos(player_angle) * 5
@@ -328,17 +340,19 @@ func update(screen *ebiten.Image) error {
 	if ebiten.IsKeyPressed(ebiten.KeyD) { // D
 		player_angle += 0.05
 		// Reset
-		if player_angle > 6.283 {
+		if player_angle >= 6.283 {
 			player_angle = 0
 		}
 		player_delta_x = math.Cos(player_angle) * 5
 		player_delta_y = math.Sin(player_angle) * 5
 	}
 	if IsKeyTriggered(ebiten.KeyM) == true {
-		if show_debug == 0 {
-          show_debug = 1
+		if STATE_SHOW_2D_MAP == 0 {
+        STATE_SHOW_2D_MAP = 1
+        x3d_orig = 530
 	    } else {
-	      show_debug = 0
+	      STATE_SHOW_2D_MAP = 0
+	      x3d_orig = 0
 	    }
 	}
 	if IsKeyTriggered(ebiten.KeyF) == true {
@@ -367,8 +381,6 @@ func main() {
 		log.Fatal(err)
 	}
 	fmt.Println(engine_version)
-	//ebiten.SetCursorMode(ebiten.CursorModeCaptured)
-
 	ebiten.Run(update, 1024, 512, 1, engine_version)
 }
 
