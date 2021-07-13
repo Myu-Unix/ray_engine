@@ -1,10 +1,16 @@
 ## ray_engine
 
-### A toy raycasting engine built with Go + Ebiten (v1) 2D library
-
-![img](screenie_game.png) ![img](screenie.png)
+#### A toy raycasting engine built with Go + Ebiten (v1) 2D library
 
 Heavily based on 3DSage fantastic Youtube videos of a C/OpenGL raycasting engine : https://www.youtube.com/watch?v=gYRrGTC7GtA
+
+_2D map rendered in 3D_
+
+![img](screenie_game.png) 
+
+_Gun mode !_
+
+![img](screenie.png)
 
 #### Build
 
