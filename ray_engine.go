@@ -196,8 +196,10 @@ func cast_rays(screen *ebiten.Image) {
 	for ray := 0; ray < 72; ray++ { // numbers of ray casted
 		// Horizontal lines
 		check_horiz()
-		// Vertical lines + smallest line
+		// Vertical lines + smallest line drawn on screen
 		check_verti(screen)
+		// Fix fisheye effect
+		fix_fisheye()
 
 	  // Draw 3D lines/map
 		lineH = float64(64 * 320) / disT
@@ -206,18 +208,16 @@ func cast_rays(screen *ebiten.Image) {
 		}
 		
 		// Dim 2.0 shader
-		COLOR_R=uint8(float64(lineH - 65)) // 320(max) - 65 = 255 (max RGB value)
-		if COLOR_R < 0 {
-			COLOR_R = 0
-		}
-		if COLOR_R > 255 {
-			COLOR_R = 0
+		if disT >= 255 {
+		COLOR_R = 255
+		} else if disT <= 0 {
+		COLOR_R = 0	
+		} else {
+		COLOR_R=uint8(float64(disT))
 		}
 		// End of Dim 2.0 shader
-    //COLOR_R = 192
-		// Fix fisheye effect
-		fix_fisheye()
 
+		// Line offset
 		lineO = 160 - (lineH/float64(3)) // was 2 (int) but 2.x helps with perspective somehow
 
 		// x, y, ray x8, lineH
@@ -259,7 +259,6 @@ func update(screen *ebiten.Image) error {
 					opwall.GeoM.Translate(wall_posx, wall_posy)
 					screen.DrawImage(wallImage, opwall)
 				}
-
 				if wall_posx < 448 {
 					wall_posx += 64
 				} else {
