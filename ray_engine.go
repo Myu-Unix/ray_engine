@@ -43,8 +43,8 @@ var (
 	mapY                int     = 8
 	boot                        = 56
 	engine_version              = "ray_engine 0.6.1"
-	debug_str                   = "'Arrow keys to move, 'k' to exit, 'm' to toogle the 2D map and GUN MODE :D"
-	debug_str2                  = "'f' for sullscreen, 'i' for debug info"
+	debug_str                   = "'Arrow keys to move, 'k' to exit, 'i' for debug info"
+	debug_str2                  = "'m' to toogle the 2D map and GUN MODE :D, 'f' for fullscreen"
 	str                 string
 	map_array           = [64]int{
 		1, 1, 1, 1, 1, 1, 1, 1,
@@ -295,7 +295,6 @@ func update(screen *ebiten.Image) error {
 		if STATE_SHOW_2D_MAP == 1 {
 			ebitenutil.DrawLine(screen, player_pos_x, player_pos_y, player_pos_x+(player_delta_x*5), player_pos_y+(player_delta_y*5), color.RGBA{255, 255, 0, 255})
 		} else {
-			STATE_SHOW_DEBUG = 0
 			// Gun
 			screen.DrawImage(gunImage, opGun)
 			screen.DrawImage(CrossHairImage, opCrosshair)

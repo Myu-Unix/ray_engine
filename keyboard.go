@@ -33,15 +33,15 @@ func keyboard_handling() {
 	} else {
 		keyStates[ebiten.KeyEnter] = 0
 	}
-	if ebiten.IsKeyPressed(ebiten.KeyUp) { // Z Azerty
+	if ebiten.IsKeyPressed(ebiten.KeyUp) || ebiten.IsKeyPressed(ebiten.KeyW) { // Z Azerty
 		player_pos_x = player_pos_x + player_delta_x
 		player_pos_y = player_pos_y + player_delta_y
 	}
-	if ebiten.IsKeyPressed(ebiten.KeyDown) { // S
+	if ebiten.IsKeyPressed(ebiten.KeyDown) || ebiten.IsKeyPressed(ebiten.KeyS) { // S
 		player_pos_x = player_pos_x - player_delta_x
 		player_pos_y = player_pos_y - player_delta_y
 	}
-	if ebiten.IsKeyPressed(ebiten.KeyLeft) { // Q Azerty
+	if ebiten.IsKeyPressed(ebiten.KeyLeft) || ebiten.IsKeyPressed(ebiten.KeyA) { // Q Azerty
 		player_angle -= 0.05
 		// Reset
 		if player_angle <= 0 {
@@ -50,7 +50,7 @@ func keyboard_handling() {
 		player_delta_x = math.Cos(player_angle) * 5
 		player_delta_y = math.Sin(player_angle) * 5
 	}
-	if ebiten.IsKeyPressed(ebiten.KeyRight) { // D
+	if ebiten.IsKeyPressed(ebiten.KeyRight) || ebiten.IsKeyPressed(ebiten.KeyD) { // D
 		player_angle += 0.05
 		// Reset
 		if player_angle >= 6.283 {
