@@ -4,7 +4,7 @@
 
 A toy raycasting engine built with Go + Ebiten (v1) 2D library
 
-Heavily based on 3DSage fantastic youtube video of a C/OpenGL raycasting engine : https://www.youtube.com/watch?v=gYRrGTC7GtA
+Heavily based on 3DSage fantastic Youtube videos of a C/OpenGL raycasting engine : https://www.youtube.com/watch?v=gYRrGTC7GtA
 
 #### Build
 
@@ -14,6 +14,11 @@ Heavily based on 3DSage fantastic youtube video of a C/OpenGL raycasting engine 
 
     ./ray_engine
 
-#### The code is ugly af
+#### Todo
 
-    I know right, PR's are welcome :p
+- [ ] Scale map to 32x32+
+- [ ] Scale viewport/window to 1080p
+- [ ] Port to Ebiten v2
+- [ ] Make a 2D minimap
+- [ ] Add floor/ceiling
+- [ ] Binary textures

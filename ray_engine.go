@@ -42,8 +42,8 @@ var (
 	mapX              int     = 8
 	mapY              int     = 8
 	boot                      = 56
-	engine_version            = "ray_engine 0.6.0 (Summer 2021)"
-	debug_str                 = "'z/s/q/d' (Azerty) to move, 'k' to exit, 'm' to toogle the 2D map"
+	engine_version            = "ray_engine 0.6.0"
+	debug_str                 = "'Arrow keys to move, 'k' to exit, 'm' to toogle the 2D map"
 	debug_str2                = "'f' for sullscreen, 'i' for debug info"
 	str               string
 	map_array         = [64]int{
@@ -208,13 +208,7 @@ func cast_rays(screen *ebiten.Image) {
 		// Fix fisheye effect
 		fix_fisheye()
 
-		// Draw 3D lines/map
-		lineH = float64(64*320) / disT
-		if lineH > float64(320) {
-			lineH = float64(320)
-		}
-
-		// Dim 2.0 shader - COLOR_R is handled here
+		// Shader - COLOR_R is handled here
 		if disT >= 255 {
 			COLOR_R = 255
 		} else if disT <= 0 {
@@ -223,6 +217,11 @@ func cast_rays(screen *ebiten.Image) {
 			COLOR_R = uint8(float64(disT))
 		}
 
+		// Draw 3D lines/map section
+		lineH = float64(64*320) / disT
+		if lineH > float64(320) {
+			lineH = float64(320)
+		}
 		// Line offset
 		lineO = 160 - (lineH / float64(3)) // was 2 (int) but 2.x helps with perspective somehow
 
@@ -321,16 +320,15 @@ func update(screen *ebiten.Image) error {
 	} else {
 		keyStates[ebiten.KeyI] = 0
 	}
-
-	if ebiten.IsKeyPressed(ebiten.KeyW) { // Z Azerty
+	if ebiten.IsKeyPressed(ebiten.KeyUp) { // Z Azerty
 		player_pos_x = player_pos_x + player_delta_x
 		player_pos_y = player_pos_y + player_delta_y
 	}
-	if ebiten.IsKeyPressed(ebiten.KeyS) { // S
+	if ebiten.IsKeyPressed(ebiten.KeyDown) { // S
 		player_pos_x = player_pos_x - player_delta_x
 		player_pos_y = player_pos_y - player_delta_y
 	}
-	if ebiten.IsKeyPressed(ebiten.KeyA) { // Q Azerty
+	if ebiten.IsKeyPressed(ebiten.KeyLeft) { // Q Azerty
 		player_angle -= 0.05
 		// Reset
 		if player_angle <= 0 {
@@ -339,7 +337,7 @@ func update(screen *ebiten.Image) error {
 		player_delta_x = math.Cos(player_angle) * 5
 		player_delta_y = math.Sin(player_angle) * 5
 	}
-	if ebiten.IsKeyPressed(ebiten.KeyD) { // D
+	if ebiten.IsKeyPressed(ebiten.KeyRight) { // D
 		player_angle += 0.05
 		// Reset
 		if player_angle >= 6.283 {
