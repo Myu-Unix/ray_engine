@@ -15,6 +15,7 @@ import (
 	"math"
 	"os"
 	"strings"
+	//"strconv"
 )
 
 var (
@@ -27,31 +28,30 @@ var (
 	bg_posy         float64 = 0
 	wall_posx       float64 = 0
 	wall_posy       float64 = 0
-	CONST_PI        float64 = 3.14159
+	CONST_PI        float64 = 3.1415926535
 	CONST_PI2       float64 = CONST_PI / 2
-	CONST_PI3       float64 = 3 * (CONST_PI / 2)
+	CONST_PI3       float64 = (3 * CONST_PI) / 2
 	CONST_DR        float64 = 0.0174533 // one radian in degrees
-	//CONST_2D_MAP_BLOC_SIZE float64 = 64
 	player_pos_x    float64 = 220
 	player_pos_y    float64 = 320
 	player_delta_x  float64 = 0
 	player_delta_y  float64 = 0
-	player_angle            = 4.33 // Initial angle
+	player_angle    float64 = 0 // Initial angle
 	mapX            int     = 8
 	mapY            int     = 8
 	boot                    = 56
 	STATE_SHOW_2D_MAP = 1
-	engine_version          = "ray_engine 0.5.8"
+	engine_version          = "ray_engine 0.5.9"
 	debug_str               = "'z/s/q/d' (Azerty) to move, 'k' to exit, 'm' to draw the 2D map"
 	str             string
 	map_array = [64]int{
 		1, 1, 1, 1, 1, 1, 1, 1,
+		1, 0, 0, 0, 0, 0, 1, 1,
 		1, 0, 0, 0, 0, 1, 1, 1,
-		1, 0, 1, 0, 0, 1, 0, 1,
-		1, 1, 0, 0, 0, 1, 0, 1,
 		1, 0, 0, 0, 0, 0, 0, 1,
-		1, 0, 0, 0, 0, 0, 0, 1,
-		1, 0, 1, 0, 0, 0, 0, 1,
+		1, 0, 0, 0, 0, 1, 1, 1,
+		1, 0, 0, 0, 0, 0, 1, 1,
+		1, 1, 0, 0, 0, 0, 0, 1,
 		1, 1, 1, 1, 1, 1, 1, 1,
 	}
 
@@ -83,8 +83,9 @@ func fix_fisheye() {
   disT = disT * math.Cos(ca)
 }
 
-func cast_horiz() {
+func check_horiz() {
 		dof = 0
+		disH = 1000000
 		hx = player_pos_x
 		hy = player_pos_y
 		aTan = -1 / math.Tan(ra)
@@ -110,7 +111,7 @@ func cast_horiz() {
 			mx = (int(rx) >> 6)
 			my = (int(ry) >> 6)
 			mp = my*mapX + mx
-			if (mp > 0 && mp < mapX*mapY) && map_array[mp] > 0 { // was == 1
+			if (mp > 0 && mp < mapX*mapY && map_array[mp] > 0) { // was == 1
 				dof = 8 // hit wall
 				hx = rx
 				hy = ry
@@ -119,13 +120,14 @@ func cast_horiz() {
 			} else {
 				rx = rx + xo
 				ry = ry + yo
-				dof = dof + 1
+				dof++
 			}
 		}
 }
 
-func cast_verti(screen *ebiten.Image) {
+func check_verti(screen *ebiten.Image) {
 dof = 0
+disV = 1000000
 		vx = player_pos_x
 		vy = player_pos_y
 		nTan = -math.Tan(ra)
@@ -141,6 +143,7 @@ dof = 0
 			xo = 64
 			yo = -xo * nTan
 		}
+		// staight up or down
 		if ra == 0 || ra == CONST_PI {
 			rx = player_pos_x
 			ry = player_pos_y
@@ -150,31 +153,30 @@ dof = 0
 			mx = (int(rx) >> 6)
 			my = (int(ry) >> 6)
 			mp = my*mapX + mx
-			if (mp > 0 && mp < mapX*mapY) && map_array[mp] > 0 { // was == 1
+			if (mp > 0 && mp < mapX*mapY && map_array[mp] > 0) { // was == 1
 				dof = 8 // hit wall
 				vx = rx ; vy = ry
 				// ax ay bx by ang
 				disV = math.Sqrt((vx-player_pos_x)*(vx-player_pos_x) + (vy-player_pos_y)*(vy-player_pos_y))
 			} else {
-				rx = rx + xo ; ry = ry + yo ; dof = dof + 1
+				rx = rx + xo ; ry = ry + yo ; dof++
 			}
 		}
 		if disV < disH {
 			rx = vx ; ry = vy ; disT = disV
-			/*COLOR_R = 192
+			//COLOR_R = 0
 			COLOR_G = 0
-			COLOR_B = 50*/
+			COLOR_B = 255
 		} else if disH < disV {
 			rx = hx ; ry = hy ; disT = disH
-			/*COLOR_R = 248
+			//COLOR_R = 0
 			COLOR_G = 0
-			COLOR_B = 50*/
+			COLOR_B = 96
 		}
 		// Draw Shortest ray based on disT in Orange
 		if STATE_SHOW_2D_MAP == 1 {
 		  ebitenutil.DrawLine(screen, player_pos_x, player_pos_y, rx, ry, color.RGBA{255, 128, 0, 255})
 	  }
-		ra = (ra + CONST_DR)
 		if ra < 0 {
 			ra = ra + (2 * CONST_PI)
 		}
@@ -184,57 +186,45 @@ dof = 0
 }
 
 func cast_rays(screen *ebiten.Image) {
-	ra = player_angle - CONST_DR*30
+	ra = player_angle - CONST_DR*36 // numbers of ray / 2
 	if ra < 0 {
-		ra = ra + 2*CONST_PI
+		ra = ra + (2 * CONST_PI)
 	}
-	if ra > 2*CONST_PI {
-		ra = ra - 2*CONST_PI
+	if ra > (2 * CONST_PI) {
+		ra = ra - (2 * CONST_PI)
 	}
-	for ray := 0; ray < 128; ray++ { // numbers of ray casted
+	for ray := 0; ray < 72; ray++ { // numbers of ray casted
 		// Horizontal lines
-		cast_horiz()
+		check_horiz()
 		// Vertical lines + smallest line
-		cast_verti(screen)
-		// Fix fisheye effect
-		fix_fisheye()
+		check_verti(screen)
 
 	  // Draw 3D lines/map
 		lineH = float64(64 * 320) / disT
 		if lineH > float64(320) {
 			lineH = float64(320)
 		}
-		// "dim" far objects
-		/*if lineH < float64(160) {
-			COLOR_R = 128
-			COLOR_G = 0
-			COLOR_B = 50
-		}
-		if lineH < float64(120) {
-			COLOR_R = 96
-			COLOR_G = 0
-			COLOR_B = 25
-		}
-		if lineH < float64(80) {
-			COLOR_R = 64
-			COLOR_G = 0
-			COLOR_B = 0
-		}*/
 		
 		// Dim 2.0 shader
-		COLOR_R=uint8(float64(lineH - 65))
+		COLOR_R=uint8(float64(lineH - 65)) // 320(max) - 65 = 255 (max RGB value)
 		if COLOR_R < 0 {
 			COLOR_R = 0
 		}
-		if COLOR_R> 255 {
-			COLOR_R = 255
+		if COLOR_R > 255 {
+			COLOR_R = 0
 		}
-		COLOR_B=50
+		// End of Dim 2.0 shader
+    //COLOR_R = 192
+		// Fix fisheye effect
+		fix_fisheye()
 
-		lineO = 160 - (lineH/float64(2.25)) // was 2 (int) but 2.x helps with perspective somehow
-		// x, y, rayx8, lineH
+		lineO = 160 - (lineH/float64(3)) // was 2 (int) but 2.x helps with perspective somehow
+
+		// x, y, ray x8, lineH
+		//fmt.Println(strconv.Itoa(int(COLOR_R))
 		ebitenutil.DrawRect(screen, float64(x3d), float64(lineO), float64(8), lineH+lineO, color.RGBA{COLOR_R, COLOR_G, COLOR_B, 255})
 		x3d = x3d + 8
+		ra = (ra + CONST_DR) // increment
 	}
 	x3d = x3d_orig
 }
@@ -253,9 +243,11 @@ func update(screen *ebiten.Image) error {
 	if boot > 0 {
 		boot = boot - 1
 		screen.DrawImage(SplashImage, opSplash)
-		// Initial values for PDX/PDY
-		player_delta_x = math.Cos(player_angle) * 5
-		player_delta_y = math.Sin(player_angle) * 5
+		if boot == 1 {
+			// Initial values for PDX/PDY, only applied once
+			player_delta_x = math.Cos(player_angle) * 5
+			player_delta_y = math.Sin(player_angle) * 5
+	  }
 	} else {
 		screen.DrawImage(backgroundImage, opBackground)
 		// Draw 2D map
@@ -289,7 +281,6 @@ func update(screen *ebiten.Image) error {
 		// https://pkg.go.dev/github.com/hajimehoshi/ebiten/ebitenutil#DrawLine
 		if STATE_SHOW_2D_MAP == 1 {
 		  ebitenutil.DrawLine(screen, player_pos_x, player_pos_y, player_pos_x+(player_delta_x*5), player_pos_y+(player_delta_y*5), color.RGBA{255, 255, 0, 255})
-		  //ebitenutil.DrawLine(screen, player_pos_x, player_pos_y, player_pos_x+(player_delta_x*2), player_pos_y+(player_delta_y*2), color.RGBA{255, 255, 0, 255})
 	  }
 
 		// Show debug info
