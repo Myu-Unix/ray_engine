@@ -6,11 +6,11 @@ Heavily based on 3DSage fantastic Youtube videos of a C/OpenGL raycasting engine
 
 _2D map rendered in 3D_
 
-![img](screenie_game.png) 
+![img](screenie.png)
 
 _Gun mode !_
 
-![img](screenie.png)
+![img](screenie_game.png) 
 
 #### Build
 
