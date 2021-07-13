@@ -1,7 +1,6 @@
 /*
 ray_engine by Myu-Unix - Sept 2020
 Inspired by 3DSage's C/OpenGL raycasting engine : https://www.youtube.com/watch?v=gYRrGTC7GtA
-Just a prototype from a non-pro :)
 */
 
 package main
@@ -13,40 +12,41 @@ import (
 	"image/color"
 	"log"
 	"math"
-	"os"
 	"strings"
-	//"strconv"
 )
 
 var (
-	backgroundImage   *ebiten.Image
-	SplashImage       *ebiten.Image
-	wallImage         *ebiten.Image
-	keyStates                 = map[ebiten.Key]int{}
-	STATE_SHOW_DEBUG          = 1
-	STATE_SHOW_2D_MAP         = 1
-	STATE_FULLSCREEN          = 0
-	bg_posx           float64 = 0
-	bg_posy           float64 = 0
-	wall_posx         float64 = 0
-	wall_posy         float64 = 0
-	CONST_PI          float64 = 3.1415926535
-	CONST_PI2         float64 = CONST_PI / 2
-	CONST_PI3         float64 = (3 * CONST_PI) / 2
-	CONST_DR          float64 = 0.0174533 // one radian in degrees
-	player_pos_x      float64 = 220
-	player_pos_y      float64 = 320
-	player_delta_x    float64 = 0
-	player_delta_y    float64 = 0
-	player_angle      float64 = 0 // Initial angle
-	mapX              int     = 8
-	mapY              int     = 8
-	boot                      = 56
-	engine_version            = "ray_engine 0.6.0"
-	debug_str                 = "'Arrow keys to move, 'k' to exit, 'm' to toogle the 2D map"
-	debug_str2                = "'f' for sullscreen, 'i' for debug info"
-	str               string
-	map_array         = [64]int{
+	backgroundImage     *ebiten.Image
+	SplashImage         *ebiten.Image
+	wallImage           *ebiten.Image
+	gunImage            *ebiten.Image
+	CrossHairImage      *ebiten.Image
+	keyStates                   = map[ebiten.Key]int{}
+	STATE_SHOW_DEBUG            = 1
+	STATE_SHOW_2D_MAP           = 1
+	STATE_FULLSCREEN            = 0
+	STATE_MOUSE_SUPPORT         = 1
+	bg_posx             float64 = 0
+	bg_posy             float64 = 0
+	wall_posx           float64 = 0
+	wall_posy           float64 = 0
+	CONST_PI            float64 = 3.1415926535
+	CONST_PI2           float64 = CONST_PI / 2
+	CONST_PI3           float64 = (3 * CONST_PI) / 2
+	CONST_DR            float64 = 0.0174533 // one radian in degrees
+	player_pos_x        float64 = 220
+	player_pos_y        float64 = 320
+	player_delta_x      float64 = 0
+	player_delta_y      float64 = 0
+	player_angle        float64 = 0 // Initial angle
+	mapX                int     = 8
+	mapY                int     = 8
+	boot                        = 56
+	engine_version              = "ray_engine 0.6.1"
+	debug_str                   = "'Arrow keys to move, 'k' to exit, 'm' to toogle the 2D map and GUN MODE :D"
+	debug_str2                  = "'f' for sullscreen, 'i' for debug info"
+	str                 string
+	map_array           = [64]int{
 		1, 1, 1, 1, 1, 1, 1, 1,
 		1, 0, 0, 0, 0, 0, 1, 1,
 		1, 0, 0, 0, 0, 1, 1, 1,
@@ -70,6 +70,12 @@ var (
 	x3d_orig                           float64 = 530 // Offset toogle - 0 = 2D MAP on, 530 = 2D MAP Off - set at compile time
 	ca                                 float64 = 0
 	COLOR_R, COLOR_G, COLOR_B          uint8
+	// Mouse vars
+	x int = 0
+	y int = 0
+	// Gun
+	gunx float64 = 340
+	guny float64 = 350
 )
 
 //fix fisheye effect
@@ -238,16 +244,20 @@ func update(screen *ebiten.Image) error {
 	opBackground := &ebiten.DrawImageOptions{}
 	opSplash := &ebiten.DrawImageOptions{}
 	opwall := &ebiten.DrawImageOptions{}
+	opGun := &ebiten.DrawImageOptions{}
+	opCrosshair := &ebiten.DrawImageOptions{}
 
 	// Images options
 	opBackground.GeoM.Translate(bg_posx, bg_posy)
 	opwall.GeoM.Translate(wall_posx, wall_posy)
+	opGun.GeoM.Translate(gunx, guny)
+	opCrosshair.GeoM.Translate(240, 240)
 
 	// Draw images
 	if boot > 0 {
-		boot = boot - 1
+		//boot = boot - 1
 		screen.DrawImage(SplashImage, opSplash)
-		if boot == 1 {
+		if boot == 0 {
 			// Initial values for PDX/PDY, only applied once
 			player_delta_x = math.Cos(player_angle) * 5
 			player_delta_y = math.Sin(player_angle) * 5
@@ -284,6 +294,11 @@ func update(screen *ebiten.Image) error {
 		// Draw player line of sight after raycast -> https://pkg.go.dev/github.com/hajimehoshi/ebiten/ebitenutil#DrawLine
 		if STATE_SHOW_2D_MAP == 1 {
 			ebitenutil.DrawLine(screen, player_pos_x, player_pos_y, player_pos_x+(player_delta_x*5), player_pos_y+(player_delta_y*5), color.RGBA{255, 255, 0, 255})
+		} else {
+			STATE_SHOW_DEBUG = 0
+			// Gun
+			screen.DrawImage(gunImage, opGun)
+			screen.DrawImage(CrossHairImage, opCrosshair)
 		}
 
 		// Show debug info
@@ -299,80 +314,19 @@ func update(screen *ebiten.Image) error {
 		}
 	}
 
-	// Keyboard handling
-	if ebiten.IsKeyPressed(ebiten.KeyM) {
-		keyStates[ebiten.KeyM]++
-	} else {
-		keyStates[ebiten.KeyM] = 0
-	}
-	if ebiten.IsKeyPressed(ebiten.KeyF) {
-		keyStates[ebiten.KeyF]++
-	} else {
-		keyStates[ebiten.KeyF] = 0
-	}
-	if ebiten.IsKeyPressed(ebiten.KeyK) {
-		keyStates[ebiten.KeyK]++
-	} else {
-		keyStates[ebiten.KeyK] = 0
-	}
-	if ebiten.IsKeyPressed(ebiten.KeyI) {
-		keyStates[ebiten.KeyI]++
-	} else {
-		keyStates[ebiten.KeyI] = 0
-	}
-	if ebiten.IsKeyPressed(ebiten.KeyUp) { // Z Azerty
-		player_pos_x = player_pos_x + player_delta_x
-		player_pos_y = player_pos_y + player_delta_y
-	}
-	if ebiten.IsKeyPressed(ebiten.KeyDown) { // S
-		player_pos_x = player_pos_x - player_delta_x
-		player_pos_y = player_pos_y - player_delta_y
-	}
-	if ebiten.IsKeyPressed(ebiten.KeyLeft) { // Q Azerty
-		player_angle -= 0.05
-		// Reset
-		if player_angle <= 0 {
-			player_angle = 6.283
-		}
+	/* Keyboard - When running in goroutine, it breaks the mouse support.
+	 */
+	keyboard_handling()
+
+	// Mouse support is ALPHA
+	if STATE_MOUSE_SUPPORT == 1 {
+		ebiten.SetCursorMode(ebiten.CursorModeCaptured)
+		x, y = ebiten.CursorPosition()
+		/*fmt.Println("%v", y)
+		fmt.Println("%v", x)*/
+		player_angle = float64(x) / 360
 		player_delta_x = math.Cos(player_angle) * 5
 		player_delta_y = math.Sin(player_angle) * 5
-	}
-	if ebiten.IsKeyPressed(ebiten.KeyRight) { // D
-		player_angle += 0.05
-		// Reset
-		if player_angle >= 6.283 {
-			player_angle = 0
-		}
-		player_delta_x = math.Cos(player_angle) * 5
-		player_delta_y = math.Sin(player_angle) * 5
-	}
-	if IsKeyTriggered(ebiten.KeyM) == true {
-		if STATE_SHOW_2D_MAP == 0 {
-			STATE_SHOW_2D_MAP = 1
-			x3d_orig = 530
-		} else {
-			STATE_SHOW_2D_MAP = 0
-			x3d_orig = 0
-		}
-	}
-	if IsKeyTriggered(ebiten.KeyF) == true {
-		if STATE_FULLSCREEN == 0 {
-			ebiten.SetFullscreen(true)
-			STATE_FULLSCREEN = 1
-		} else {
-			ebiten.SetFullscreen(false)
-			STATE_FULLSCREEN = 0
-		}
-	}
-	if IsKeyTriggered(ebiten.KeyI) == true {
-		if STATE_SHOW_DEBUG == 0 {
-			STATE_SHOW_DEBUG = 1
-		} else {
-			STATE_SHOW_DEBUG = 0
-		}
-	}
-	if IsKeyTriggered(ebiten.KeyK) == true {
-		os.Exit(0)
 	}
 
 	return nil
@@ -389,6 +343,14 @@ func main() {
 		log.Fatal(err)
 	}
 	wallImage, _, err = ebitenutil.NewImageFromFile("wall.png", ebiten.FilterNearest)
+	if err != nil {
+		log.Fatal(err)
+	}
+	gunImage, _, err = ebitenutil.NewImageFromFile("gun2.png", ebiten.FilterNearest)
+	if err != nil {
+		log.Fatal(err)
+	}
+	CrossHairImage, _, err = ebitenutil.NewImageFromFile("crosshair.png", ebiten.FilterNearest)
 	if err != nil {
 		log.Fatal(err)
 	}
