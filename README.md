@@ -12,12 +12,11 @@ _Gun mode !_
 
 ![img](screenie_game.png) 
 
-#### Build
+#### Build & run
 
-    go build
+Build with Go 1.16 and Ebiten v1 on Linux
 
-#### Run
-
+     go build
     ./ray_engine
 
 #### Shortcuts
@@ -35,10 +34,16 @@ arrows : move
 #### Todo
 
 - [ ] Port to Ebiten v2
-- [ ] Scale map to 32x32+
-- [ ] Scale viewport/window to 1080p
-- [ ] Make a 2D minimap
-- [ ] Add floor/ceiling
+- [ ] Proper Collisions
+- [X] Scale map to 16x16
+- [ ] 2D minimap for gun mode
+- [X] Add basic floor/ceiling
 - [ ] Binary textures
-- [ ] Up/down parallax
-- [ ] Better mouse + keyboard support
+- [ ] Up/down parallax/Y-Shearing
+- [ ] Proper sound support
+- [ ] Weapon swap/shield
+
+#### Known bugs
+
+- [ ] Mouse support is very dodgy (blocks keyboard left/right movements)
+- [ ] "scaling issue" -> cubes becomes rectangles from afar
