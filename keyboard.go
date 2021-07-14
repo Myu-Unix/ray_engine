@@ -28,6 +28,11 @@ func keyboard_handling() {
 	} else {
 		keyStates[ebiten.KeyI] = 0
 	}
+	if ebiten.IsKeyPressed(ebiten.KeyJ) {
+		keyStates[ebiten.KeyJ]++
+	} else {
+		keyStates[ebiten.KeyJ] = 0
+	}
 	if ebiten.IsKeyPressed(ebiten.KeyN) {
 		keyStates[ebiten.KeyN]++
 	} else {
@@ -69,9 +74,11 @@ func keyboard_handling() {
 	if IsKeyTriggered(ebiten.KeyM) == true {
 		if STATE_SHOW_2D_MAP == 0 {
 			STATE_SHOW_2D_MAP = 1
+			SHOW_MINIMAP = 0
 			x3d_orig = 530
 		} else {
 			STATE_SHOW_2D_MAP = 0
+			SHOW_MINIMAP = 1
 			x3d_orig = 0
 		}
 	}
@@ -80,6 +87,13 @@ func keyboard_handling() {
 			STATE_YSHEARING = 1
 		} else {
 			STATE_YSHEARING = 0
+		}
+	}
+	if IsKeyTriggered(ebiten.KeyJ) == true {
+		if SHOW_MINIMAP == 0 {
+			SHOW_MINIMAP = 1
+		} else {
+			SHOW_MINIMAP = 0
 		}
 	}
 	if IsKeyTriggered(ebiten.KeyF) == true {

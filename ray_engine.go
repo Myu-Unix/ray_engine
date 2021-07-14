@@ -20,15 +20,17 @@ import (
 
 var (
 	STATE_SHOW_DEBUG    = 1
-	STATE_SHOW_2D_MAP   = 1
+	STATE_SHOW_2D_MAP   = 0
 	STATE_FULLSCREEN    = 0
 	STATE_MOUSE_SUPPORT = 1
 	STATE_YSHEARING     = 0
 	STATE_COLLISION     = 0
 	STATE_SOUND         = 0
+	SHOW_MINIMAP        = 1
 	backgroundImage     *ebiten.Image
 	splashImage         *ebiten.Image
 	wallImage           *ebiten.Image
+	wallMiniImage       *ebiten.Image
 	gunImage            *ebiten.Image
 	crossHairImage      *ebiten.Image
 	fireImage           *ebiten.Image
@@ -37,6 +39,8 @@ var (
 	bg_posy             float64 = 0
 	wall_posx           float64 = 0
 	wall_posy           float64 = 0
+	wall_minimap_posx   float64 = 20
+	wall_minimap_posy   float64 = 0
 	CONST_PI            float64 = 3.1415926535
 	CONST_PI2           float64 = CONST_PI / 2
 	CONST_PI3           float64 = (3 * CONST_PI) / 2
@@ -51,9 +55,9 @@ var (
 	max_dof             int     = 16
 	boot                        = 42
 	mpv_run             []byte
-	engine_version      = "ray_engine 0.6.3"
+	engine_version      = "ray_engine 0.6.5"
 	debug_str           = "'Arrow to move, 'k' to exit, 'i' for debug info, 'n' toogle Y-shearing"
-	debug_str2          = "'m' to hide 2D map and enter GUN mode, 'f' for fullscreen"
+	debug_str2          = "'m' to hide 2D map and enter GUN mode, 'f' for fullscreen, j toogle minimap"
 	str                 string
 	/*map_array           = [64]int{
 		1, 1, 1, 1, 1, 1, 1, 1,
@@ -93,15 +97,15 @@ var (
 	disT                               float64 = 0
 	lineH                              float64 = 0
 	lineO                              float64 = 0
-	x3d                                float64 = 530 // Current offset to start to draw the 3D map
-	x3d_orig                           float64 = 530 // Offset toogle - 0 = 2D MAP on, 530 = 2D MAP Off - set at compile time
+	x3d                                float64 = 0 // Current offset to start to draw the 3D map
+	x3d_orig                           float64 = 0 // Offset toogle - 0 = 2D MAP off, 530 = 2D map on - set at compile time
 	ca                                 float64 = 0
 	COLOR_R, COLOR_G, COLOR_B          uint8
 	// Mouse vars
 	x int = 0
 	y int = 0
 	// Gun vars
-	gunx          float64 = 320
+	gunx          float64 = 512
 	guny          float64 = 350
 	reset_gun_pos         = 0
 )
@@ -300,14 +304,14 @@ func update(screen *ebiten.Image) error {
 	opBackground.GeoM.Translate(bg_posx, bg_posy)
 	opwall.GeoM.Translate(wall_posx, wall_posy)
 	opGun.GeoM.Translate(gunx, guny)
-	opCrosshair.GeoM.Translate(240, 240)
-	opFire.GeoM.Translate(340, 385)
+	opCrosshair.GeoM.Translate(412, 240)
+	opFire.GeoM.Translate(512, 385)
 
 	// Reset user pos after firing
 	if reset_gun_pos > 0 {
 		reset_gun_pos = reset_gun_pos - 1
 	} else {
-		gunx = 320
+		gunx = 512
 		guny = 350
 	}
 
@@ -346,8 +350,12 @@ func update(screen *ebiten.Image) error {
 			ebitenutil.DrawRect(screen, float64(player_pos_x), float64(player_pos_y), 12, 12, color.Black)
 			ebitenutil.DrawRect(screen, float64(player_pos_x), float64(player_pos_y), 4, 4, color.RGBA{255, 100, 100, 255})
 		}
+
 		// Raycasting
 		cast_rays(screen)
+
+		// Draw minimap
+		draw_minimap(screen)
 
 		// Draw player line of sight after raycast -> https://pkg.go.dev/github.com/hajimehoshi/ebiten/ebitenutil#DrawLine
 		if STATE_SHOW_2D_MAP == 1 {
@@ -388,7 +396,7 @@ func update(screen *ebiten.Image) error {
 		player_delta_y = math.Sin(player_angle) * 5
 		// Mouse buttons
 		if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
-			//go gun_sound()
+			go gun_sound()
 			screen.DrawImage(fireImage, opFire)
 			gunx = gunx + 1
 			guny = guny - 1
@@ -410,6 +418,10 @@ func main() {
 		log.Fatal(err)
 	}
 	wallImage, _, err = ebitenutil.NewImageFromFile("wall.png", ebiten.FilterNearest)
+	if err != nil {
+		log.Fatal(err)
+	}
+	wallMiniImage, _, err = ebitenutil.NewImageFromFile("wall16.png", ebiten.FilterNearest)
 	if err != nil {
 		log.Fatal(err)
 	}

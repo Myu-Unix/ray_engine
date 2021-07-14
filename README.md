@@ -10,7 +10,7 @@ _2D map rendered in 3D_
 
 _Gun mode !_
 
-![img](screenie_game.png) 
+![img](engine.gif) 
 
 #### Build & run
 
@@ -36,7 +36,7 @@ arrows : move
 - [ ] Port to Ebiten v2
 - [ ] Proper Collisions
 - [X] Scale map to 16x16
-- [ ] 2D minimap for gun mode
+- [X] 2D minimap for gun mode
 - [X] Add basic floor/ceiling
 - [ ] Binary textures
 - [ ] Up/down parallax/Y-Shearing
