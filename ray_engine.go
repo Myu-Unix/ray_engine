@@ -431,7 +431,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	wallMiniImage, _, err = ebitenutil.NewImageFromFile("wall16.png")
+	wallMiniImage, _, err = ebitenutil.NewImageFromFile("wall8.png")
 	if err != nil {
 		log.Fatal(err)
 	}

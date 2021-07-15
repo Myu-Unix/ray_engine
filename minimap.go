@@ -16,19 +16,19 @@ func draw_minimap(screen *ebiten.Image) {
 					opWallMinimap.GeoM.Translate(wall_minimap_posx, wall_minimap_posy)
 					screen.DrawImage(wallMiniImage, opWallMinimap)
 				}
-				if wall_minimap_posx < 250 { // 20 (offset) + (16x16 -> 256) - 16
-					wall_minimap_posx += 16
+				if wall_minimap_posx < 140 { // 20 (offset) + (16x8 -> 128) - 16
+					wall_minimap_posx += 8
 				} else {
-					wall_minimap_posx = 20
-					wall_minimap_posy += 16
+					wall_minimap_posx = 20 // offset
+					wall_minimap_posy += 8
 				}
 			}
 		}
 		wall_minimap_posx = 20
-		wall_minimap_posy = 20
+		wall_minimap_posy = 350
 
 		// Draw player as a rect
-		ebitenutil.DrawRect(screen, float64((player_pos_x/4)+20), float64((player_pos_y/4)+20), 6, 6, color.RGBA{196, 255, 0, 255})
+		ebitenutil.DrawRect(screen, float64((player_pos_x/8)+20), float64((player_pos_y/8)+350), 4, 4, color.RGBA{196, 255, 0, 255})
 		//ebitenutil.DrawRect(screen, float64(player_pos_x/4), float64(player_pos_y/4), 2, 2, color.RGBA{255, 100, 100, 255})
 	}
 }
