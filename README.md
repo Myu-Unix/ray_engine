@@ -1,6 +1,6 @@
 ## ray_engine
 
-#### A toy raycasting engine built with Go + Ebiten (v1) 2D library
+#### A toy raycasting engine built with Go + Ebiten v2 2D library
 
 Heavily based on 3DSage fantastic Youtube videos of a C/OpenGL raycasting engine : https://www.youtube.com/watch?v=gYRrGTC7GtA
 
@@ -14,7 +14,7 @@ _Gun mode !_
 
 #### Build & run
 
-Build with Go 1.16 and Ebiten v1 on Linux
+Build with Go 1.16 and Ebiten v2 on Linux
 
      go build
     ./ray_engine
