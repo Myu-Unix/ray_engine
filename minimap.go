@@ -7,8 +7,7 @@ import (
 )
 
 func draw_minimap(screen *ebiten.Image) {
-	if SHOW_MINIMAP == 1 {
-		// Draw minimap
+	if STATE_MINIMAP == 1 {
 		for k := 0; k < mapX; k++ {
 			for l := 0; l < mapY; l++ {
 				if map_array[k*mapX+l] == 1 {
@@ -20,7 +19,7 @@ func draw_minimap(screen *ebiten.Image) {
 					opEnemyMinimap.GeoM.Translate(wall_minimap_posx, wall_minimap_posy)
 					screen.DrawImage(wallEnemyImage, opEnemyMinimap)
 				}
-				if wall_minimap_posx < 140 { // 20 (offset) + (16x8 -> 128) - 16
+				if wall_minimap_posx <= 132 { // 20 (offset) + (16x8 -> 128) - 16
 					wall_minimap_posx += 8
 				} else {
 					wall_minimap_posx = 20 // offset
@@ -28,11 +27,11 @@ func draw_minimap(screen *ebiten.Image) {
 				}
 			}
 		}
+		// Minimap is place on the lower left corner of the screen
 		wall_minimap_posx = 20
 		wall_minimap_posy = 350
 
 		// Draw player as a rect
-		ebitenutil.DrawRect(screen, float64((player_pos_x/8)+20), float64((player_pos_y/8)+350), 4, 4, color.RGBA{196, 255, 0, 255})
-		//ebitenutil.DrawRect(screen, float64(player_pos_x/4), float64(player_pos_y/4), 2, 2, color.RGBA{255, 100, 100, 255})
+		ebitenutil.DrawRect(screen, float64((player_pos_x/8)+wall_minimap_posx), float64((player_pos_y/8)+wall_minimap_posy), 4, 4, color.RGBA{196, 255, 0, 255})
 	}
 }

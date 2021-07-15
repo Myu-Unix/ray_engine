@@ -2,7 +2,7 @@
 
 #### A toy raycasting engine built with Go + Ebiten v2 2D library
 
-Heavily based on 3DSage fantastic Youtube videos of a C/OpenGL raycasting engine : https://www.youtube.com/watch?v=gYRrGTC7GtA
+Heavily based on [3DSage fantastic Youtube videos of a C/OpenGL raycasting engine](https://www.youtube.com/watch?v=gYRrGTC7GtA)
 
 _Gun mode !_
 
@@ -20,31 +20,31 @@ Build with Go 1.16 and Ebiten v2 on Linux
      go build
     ./ray_engine
 
-#### Shortcuts
+#### Keymaps
 
-arrows : move
+Arrows keys or ZSQD (Azerty) : Move
 
 'i' : debug info toogle
 
 'f' : fullscreen toogle
 
-','' : No 2D map, "gun mode"
+'m' : Gun mode
 
 'k' : quit
 
-#### Features and todo
+#### Features, todos and idea box
 
 - [X] Port to Ebiten v2
 - [ ] Proper Collisions
 - [X] Scale map to 16x16
 - [X] 2D minimap for gun mode
-- [X] Add basic floor/ceiling
+- [X] Add basic floor/ceiling - **Just a matching png for now**
 - [ ] Binary textures
 - [ ] Up/down parallax/Y-Shearing
 - [ ] Ebiten Audio mp3 sound support
 - [ ] Weapon swap/shield
-- [ ] Proper ballistics - **Very rough prototype, to improve**
-- [X] Cube destruction
+- [ ] Proper ballistics - **Very very rough prototype, to improve**
+- [ ] Cube destruction/basic enemies - **Very very rough prototype, to improve**
 
 #### Known bugs
 
