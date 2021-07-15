@@ -7,16 +7,20 @@ package main
 
 import (
 	"fmt"
-	"github.com/hajimehoshi/ebiten"
-	"github.com/hajimehoshi/ebiten/ebitenutil"
-	"github.com/hajimehoshi/ebiten/inpututil"
+
+	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 
 	"image/color"
+	_ "image/png"
 	"log"
 	"math"
 	"os/exec"
 	"strings"
 )
+
+type game struct{}
 
 var (
 	STATE_SHOW_DEBUG    = 1
@@ -291,7 +295,7 @@ func cast_rays(screen *ebiten.Image) {
 	x3d = x3d_orig
 }
 
-func update(screen *ebiten.Image) error {
+func (g *game) Draw(screen *ebiten.Image) {
 
 	opBackground := &ebiten.DrawImageOptions{}
 	opSplash := &ebiten.DrawImageOptions{}
@@ -357,7 +361,7 @@ func update(screen *ebiten.Image) error {
 		// Draw minimap
 		draw_minimap(screen)
 
-		// Draw player line of sight after raycast -> https://pkg.go.dev/github.com/hajimehoshi/ebiten/ebitenutil#DrawLine
+		// Draw player line of sight after raycast -> https://pkg.go.dev/github.com/hajimehoshi/ebiten/v2/ebitenutil#DrawLine
 		if STATE_SHOW_2D_MAP == 1 {
 			ebitenutil.DrawLine(screen, player_pos_x, player_pos_y, player_pos_x+(player_delta_x*5), player_pos_y+(player_delta_y*5), color.RGBA{255, 255, 0, 255})
 		} else {
@@ -403,42 +407,51 @@ func update(screen *ebiten.Image) error {
 			reset_gun_pos = 1
 		}
 	}
+}
 
+func (g *game) Update() error {
 	return nil
+}
+
+func (g *game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
+	return 1024, 512
 }
 
 func main() {
 	var err error
-	backgroundImage, _, err = ebitenutil.NewImageFromFile("bg_ceiling_floor.png", ebiten.FilterNearest)
+	backgroundImage, _, err = ebitenutil.NewImageFromFile("bg_ceiling_floor.png")
 	if err != nil {
 		log.Fatal(err)
 	}
-	splashImage, _, err = ebitenutil.NewImageFromFile("splash_dev.png", ebiten.FilterNearest)
+	splashImage, _, err = ebitenutil.NewImageFromFile("splash_dev.png")
 	if err != nil {
 		log.Fatal(err)
 	}
-	wallImage, _, err = ebitenutil.NewImageFromFile("wall.png", ebiten.FilterNearest)
+	wallImage, _, err = ebitenutil.NewImageFromFile("wall.png")
 	if err != nil {
 		log.Fatal(err)
 	}
-	wallMiniImage, _, err = ebitenutil.NewImageFromFile("wall16.png", ebiten.FilterNearest)
+	wallMiniImage, _, err = ebitenutil.NewImageFromFile("wall16.png")
 	if err != nil {
 		log.Fatal(err)
 	}
-	gunImage, _, err = ebitenutil.NewImageFromFile("gun2.png", ebiten.FilterNearest)
+	gunImage, _, err = ebitenutil.NewImageFromFile("gun2.png")
 	if err != nil {
 		log.Fatal(err)
 	}
-	crossHairImage, _, err = ebitenutil.NewImageFromFile("crosshair.png", ebiten.FilterNearest)
+	crossHairImage, _, err = ebitenutil.NewImageFromFile("crosshair.png")
 	if err != nil {
 		log.Fatal(err)
 	}
-	fireImage, _, err = ebitenutil.NewImageFromFile("fire.png", ebiten.FilterNearest)
+	fireImage, _, err = ebitenutil.NewImageFromFile("fire.png")
 	if err != nil {
 		log.Fatal(err)
 	}
 	fmt.Println(engine_version)
-	ebiten.Run(update, 1024, 512, 1, engine_version)
+	ebiten.SetWindowTitle(engine_version)
+	ebiten.SetWindowSize(1024, 512)
+	g := &game{}
+	ebiten.RunGame(g)
 }
 
 func IsKeyTriggered(key ebiten.Key) bool {
