@@ -37,7 +37,7 @@ var (
 	gunImage            *ebiten.Image
 	crossHairImage      *ebiten.Image
 	fireImage           *ebiten.Image
-	keyStates           = map[ebiten.Key]int{}
+	keyStates                   = map[ebiten.Key]int{}
 	bg_posx             float64 = 0
 	bg_posy             float64 = 0
 	wall_posx           float64 = 0
