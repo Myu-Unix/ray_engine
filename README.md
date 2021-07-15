@@ -33,7 +33,7 @@ arrows : move
 
 #### Todo
 
-- [ ] Port to Ebiten v2
+- [X] Port to Ebiten v2
 - [ ] Proper Collisions
 - [X] Scale map to 16x16
 - [X] 2D minimap for gun mode
