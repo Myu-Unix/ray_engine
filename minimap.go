@@ -15,6 +15,10 @@ func draw_minimap(screen *ebiten.Image) {
 					opWallMinimap := &ebiten.DrawImageOptions{}
 					opWallMinimap.GeoM.Translate(wall_minimap_posx, wall_minimap_posy)
 					screen.DrawImage(wallMiniImage, opWallMinimap)
+				} else if map_array[k*mapX+l] == 2 {
+					opEnemyMinimap := &ebiten.DrawImageOptions{}
+					opEnemyMinimap.GeoM.Translate(wall_minimap_posx, wall_minimap_posy)
+					screen.DrawImage(wallEnemyImage, opEnemyMinimap)
 				}
 				if wall_minimap_posx < 140 { // 20 (offset) + (16x8 -> 128) - 16
 					wall_minimap_posx += 8

@@ -4,13 +4,14 @@
 
 Heavily based on 3DSage fantastic Youtube videos of a C/OpenGL raycasting engine : https://www.youtube.com/watch?v=gYRrGTC7GtA
 
+_Gun mode !_
+
+![img](engine.gif) 
+
 _2D map rendered in 3D_
 
 ![img](screenie.png)
 
-_Gun mode !_
-
-![img](engine.gif) 
 
 #### Build & run
 
@@ -31,7 +32,7 @@ arrows : move
 
 'k' : quit
 
-#### Todo
+#### Features and todo
 
 - [X] Port to Ebiten v2
 - [ ] Proper Collisions
@@ -40,8 +41,10 @@ arrows : move
 - [X] Add basic floor/ceiling
 - [ ] Binary textures
 - [ ] Up/down parallax/Y-Shearing
-- [ ] Proper sound support
+- [ ] Ebiten Audio mp3 sound support
 - [ ] Weapon swap/shield
+- [ ] Proper ballistics - **Very rough prototype, to improve**
+- [X] Cube destruction
 
 #### Known bugs
 
