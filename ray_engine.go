@@ -61,7 +61,7 @@ var (
 	max_dof           int     = 16
 	boot                      = 42
 	mpv_run           []byte
-	engine_version    = "ray_engine 0.7.4"
+	engine_version    = "ray_engine 0.7.5"
 	debug_str         = "'Arrow : move, 'k' : exit, 'i' : debug info, 'l' : scanlines"
 	debug_str2        = "'m' : Gun mode/2D map mode, 'f' : fullscreen, j : toogle minimap"
 	str               string
@@ -235,14 +235,14 @@ func check_verti(screen *ebiten.Image) {
 		rx = vx
 		ry = vy
 		disT = disV
-		COLOR_G = 154
-		COLOR_B = 218
+		COLOR_G = 0
+		COLOR_B = 255
 	} else if disH < disV {
 		rx = hx
 		ry = hy
 		disT = disH
-		COLOR_G = 30
-		COLOR_B = 30
+		COLOR_G = 0
+		COLOR_B = 96
 	}
 
 	// Draw shortest ray based on disT in Orange
@@ -291,9 +291,9 @@ func cast_rays(screen *ebiten.Image) {
 		}
 
 		// Draw lines on 3D map section
-		lineH = float64(16*320) / disT
-		if lineH > float64(320) {
-			lineH = float64(320)
+		lineH = float64(16*512) / disT
+		if lineH > float64(512) {
+			lineH = float64(512)
 		}
 
 		// Basic Line offset
