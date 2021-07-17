@@ -35,48 +35,49 @@ var (
 	wallMiniImage       *ebiten.Image
 	wallEnemyImage      *ebiten.Image
 	gunImage            *ebiten.Image
-	crossHairImage      *ebiten.Image
-	fireImage           *ebiten.Image
-	keyStates                   = map[ebiten.Key]int{}
-	bg_posx             float64 = 0
-	bg_posy             float64 = 0
-	wall_posx           float64 = 0
-	wall_posy           float64 = 0
-	wall_minimap_posx   float64 = 20
-	wall_minimap_posy   float64 = 350
-	CONST_PI            float64 = 3.1415926535
-	CONST_PI2           float64 = CONST_PI / 2
-	CONST_PI3           float64 = (3 * CONST_PI) / 2
-	CONST_DR            float64 = 0.0174533 // one radian in degrees
-	player_pos_x        float64 = 115
-	player_pos_y        float64 = 220
-	player_delta_x      float64 = 0
-	player_delta_y      float64 = 0
-	player_angle        float64 = 0
-	mapX                int     = 16
-	mapY                int     = 16
-	max_dof             int     = 16
-	boot                        = 42
-	mpv_run             []byte
-	engine_version      = "ray_engine 0.7.1"
-	debug_str           = "'Arrow to move, 'k' to exit, 'i' for debug info"
-	debug_str2          = "'m' : Gun mode/2D map mode, 'f' : fullscreen, j : toogle minimap"
-	str                 string
-	map_array           = [256]int{
+	//Enemy3DImage        *ebiten.Image
+	crossHairImage    *ebiten.Image
+	fireImage         *ebiten.Image
+	keyStates                 = map[ebiten.Key]int{}
+	bg_posx           float64 = 0
+	bg_posy           float64 = 0
+	wall_posx         float64 = 0
+	wall_posy         float64 = 0
+	wall_minimap_posx float64 = 20
+	wall_minimap_posy float64 = 350
+	CONST_PI          float64 = 3.1415926535
+	CONST_PI2         float64 = CONST_PI / 2
+	CONST_PI3         float64 = (3 * CONST_PI) / 2
+	CONST_DR          float64 = 0.0174533 // one radian in degrees
+	player_pos_x      float64 = 115
+	player_pos_y      float64 = 220
+	player_delta_x    float64 = 0
+	player_delta_y    float64 = 0
+	player_angle      float64 = 0
+	mapX              int     = 16
+	mapY              int     = 16
+	max_dof           int     = 16
+	boot                      = 42
+	mpv_run           []byte
+	engine_version    = "ray_engine 0.7.2"
+	debug_str         = "'Arrow to move, 'k' to exit, 'i' for debug info"
+	debug_str2        = "'m' : Gun mode/2D map mode, 'f' : fullscreen, j : toogle minimap"
+	str               string
+	map_array         = [256]int{
 		1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 		1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
 		1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-		1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 2, 0, 1,
+		1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
 		1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
 		1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
 		1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
 		1, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 1,
-		1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-		1, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-		1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-		1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 1,
+		1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 1,
 		1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
 		1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+		1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1,
+		1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1,
+		1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1,
 		1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
 		1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 	}
@@ -106,9 +107,9 @@ var (
 	center_x        float64 = 480 // 1024/2 - 32 (which is half the crosshair size)
 	center_y        float64 = 224 // 512/2 - 32 (which is half the crosshair size)
 	override_colors         = 0
-	ENEMY_SIGHT_H           = 0
-	ENEMY_SIGHT_V           = 0
+	ENEMY_SIGHT             = 0
 	enemy_mp        int     = 0
+	MP_120_BLIT     int     = 0
 )
 
 func fix_fisheye() {
@@ -150,36 +151,28 @@ func check_horiz(screen *ebiten.Image) {
 		mx = (int(rx) >> 6)
 		my = (int(ry) >> 6)
 		mp = my*mapX + mx
-		// Regular walls
-		if mp > 0 && mp < mapX*mapY && map_array[mp] == 1 {
+		// Regular walls values are '1', enemies are '2'
+		if mp > 0 && mp < mapX*mapY && map_array[mp] > 0 {
 			dof = max_dof // hit wall
 			hx = rx
 			hy = ry
 			// ax ay bx by ang
 			disH = math.Sqrt((hx-player_pos_x)*(hx-player_pos_x) + (hy-player_pos_y)*(hy-player_pos_y))
-			override_colors = 0
-			// Enemies for the sake of testing
-		} else if mp > 0 && mp < mapX*mapY && map_array[mp] == 2 {
-			dof = max_dof // hit wall
-			hx = rx
-			hy = ry
-			disH = math.Sqrt((hx-player_pos_x)*(hx-player_pos_x) + (hy-player_pos_y)*(hy-player_pos_y))
-			// Ballistics
-			override_colors = 1
-			// Test hit on 2 boxes
-			if ray >= 30 && ray <= 32 {
-				ebitenutil.DebugPrint(screen, "\n// DEBUG : Enemy in sight (Horizontal axis) //")
-				ENEMY_SIGHT_H = 1 // Mark "destructible"
-				enemy_mp = mp     // Mark "destructible"
-			} else {
-				ENEMY_SIGHT_H = 0
-				enemy_mp = 0
-			}
-			// End of Ballistics
 		} else {
 			rx = rx + xo
 			ry = ry + yo
 			dof++
+		}
+	}
+	// Ballistics. ray 31 is the middle ray
+	if ray == 31 {
+		if mp > 0 && mp < mapX*mapY && map_array[mp] == 2 {
+			ebitenutil.DebugPrint(screen, "\n// DEBUG : Enemy in sight")
+			ENEMY_SIGHT = 1 // Mark "destructible"
+			enemy_mp = mp   // Mark "destructible"
+		} else {
+			ENEMY_SIGHT = 0
+			enemy_mp = 0
 		}
 	}
 }
@@ -212,38 +205,28 @@ func check_verti(screen *ebiten.Image) {
 		mx = (int(rx) >> 6)
 		my = (int(ry) >> 6)
 		mp = my*mapX + mx
-		// Regular walls
-		if mp > 0 && mp < mapX*mapY && map_array[mp] == 1 { // was == 1
+		// Regular walls values are '1', enemies are '2'
+		if mp > 0 && mp < mapX*mapY && map_array[mp] > 0 { // was == 1
 			dof = max_dof // hit wall
 			vx = rx
 			vy = ry
 			// ax ay bx by ang
 			disV = math.Sqrt((vx-player_pos_x)*(vx-player_pos_x) + (vy-player_pos_y)*(vy-player_pos_y))
-			override_colors = 0
-			// Enemies for the sake of testing
-		} else if mp > 0 && mp < mapX*mapY && map_array[mp] == 2 {
-			dof = max_dof // hit wall
-			vx = rx
-			vy = ry
-			// ax ay bx by ang
-			disV = math.Sqrt((vx-player_pos_x)*(vx-player_pos_x) + (vy-player_pos_y)*(vy-player_pos_y))
-			// Ballistics
-			override_colors = 1
-			// Test hit on '2' boxes
-			if ray >= 30 && ray <= 32 {
-				ebitenutil.DebugPrint(screen, "\n// DEBUG : Enemy in sight (Vertical axis) //")
-				ENEMY_SIGHT_V = 1
-				enemy_mp = mp
-			} else {
-				ENEMY_SIGHT_V = 0
-				enemy_mp = 0
-			}
-			// End of Ballistics
 		} else {
 			rx = rx + xo
 			ry = ry + yo
 			dof++
-			override_colors = 0
+		}
+	}
+	// Ballistics. ray 31 is the middle ray
+	if ray == 31 {
+		if mp > 0 && mp < mapX*mapY && map_array[mp] == 2 {
+			ebitenutil.DebugPrint(screen, "\n// DEBUG : Enemy in sight")
+			ENEMY_SIGHT = 1 // Mark "destructible"
+			enemy_mp = mp   // Mark "destructible"
+		} else { // Cannot uncomment those otherwise enemies detection is broken
+			//ENEMY_SIGHT = 0
+			//enemy_mp = 0
 		}
 	}
 	if disV < disH {
@@ -251,18 +234,13 @@ func check_verti(screen *ebiten.Image) {
 		ry = vy
 		disT = disV
 		COLOR_G = 0
-		COLOR_B = 128
+		COLOR_B = 192
 	} else if disH < disV {
 		rx = hx
 		ry = hy
 		disT = disH
 		COLOR_G = 0
 		COLOR_B = 32
-	}
-
-	if override_colors == 1 {
-		COLOR_G = 255
-		COLOR_B = 255
 	}
 
 	// Draw shortest ray based on disT in Orange
@@ -310,21 +288,39 @@ func cast_rays(screen *ebiten.Image) {
 			STATE_COLLISION = 0
 		}
 
-		// Draw 3D lines/map section
+		// Draw lines on 3D map section
 		lineH = float64(64*320) / disT
 		if lineH > float64(320) {
 			lineH = float64(320)
 		}
 
 		// Basic Line offset
-		lineO = 160 - (lineH / float64(3)) // was 2 (int) but 2.x helps with perspective somehow
+		lineO = 160 - (lineH / float64(3)) // was 2 (int) but >2 helps with perspective somehow
 
 		// x, y, ray@16px x64 = 1024, lineH
-		ebitenutil.DrawRect(screen, float64(x3d), float64(lineO), float64(16), lineH+lineO, color.RGBA{COLOR_R, COLOR_G, COLOR_B, 255})
+		if mp > 0 && mp < mapX*mapY && map_array[mp] == 2 {
+			ebitenutil.DrawRect(screen, float64(x3d), float64(lineO), float64(16), lineH+lineO, color.RGBA{255, 255, 255, 255})
+		} else {
+			ebitenutil.DrawRect(screen, float64(x3d), float64(lineO), float64(16), lineH+lineO, color.RGBA{COLOR_R, COLOR_G, COLOR_B, 240})
+		}
+
+		// Blit image on '2' blocks
+		/*if mp > 0 && mp < mapX*mapY && map_array[mp] == 2 {
+			if MP_120_BLIT == 0 {
+				x3d_save := x3d + 32
+				lineO_save := lineO + 72
+				opX := &ebiten.DrawImageOptions{}
+				opX.GeoM.Translate(x3d_save, lineO_save)
+				screen.DrawImage(Enemy3DImage, opX)
+				MP_120_BLIT = 1
+			}
+		}*/
+
 		x3d = x3d + 16
 		ra = (ra + CONST_DR) // increment
 	}
 	x3d = x3d_orig
+	MP_120_BLIT = 0
 }
 
 func (g *game) Draw(screen *ebiten.Image) {
@@ -343,7 +339,7 @@ func (g *game) Draw(screen *ebiten.Image) {
 	opCrosshair.GeoM.Translate(center_x, center_y)
 	opFire.GeoM.Translate(512, 385)
 
-	// Reset user pos after firing
+	// Reset gun position after firing
 	if reset_gun_pos > 0 {
 		reset_gun_pos = reset_gun_pos - 1
 	} else {
@@ -421,7 +417,7 @@ func (g *game) Draw(screen *ebiten.Image) {
 
 	/* Keyboard - FIXME When running in goroutine, it somewhat breaks the mouse support.
 	not possible to move left/right either */
-	keyboard_handling()
+	go keyboard_handling()
 
 	// Mouse support is ALPHA
 	if STATE_MOUSE_SUPPORT == 1 {
@@ -433,11 +429,10 @@ func (g *game) Draw(screen *ebiten.Image) {
 		// Mouse buttons
 		if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
 			// Ballistics
-			if (ENEMY_SIGHT_H == 1 || ENEMY_SIGHT_V == 1) && enemy_mp != 0 {
+			if ENEMY_SIGHT == 1 && enemy_mp != 0 {
 				//ebitenutil.DebugPrint(screen, "\n**** HIT !! ****")
 				map_array[enemy_mp] = 0 // Destroy block
-				ENEMY_SIGHT_H = 0
-				ENEMY_SIGHT_V = 0
+				ENEMY_SIGHT = 0
 			}
 			go gun_sound()
 			screen.DrawImage(fireImage, opFire)
@@ -482,6 +477,10 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	/*Enemy3DImage, _, err = ebitenutil.NewImageFromFile("imgs/enemy_test2.png")
+	if err != nil {
+		log.Fatal(err)
+	}*/
 	crossHairImage, _, err = ebitenutil.NewImageFromFile("imgs/crosshair.png")
 	if err != nil {
 		log.Fatal(err)

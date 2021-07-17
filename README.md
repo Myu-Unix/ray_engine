@@ -35,7 +35,7 @@ Arrows keys or ZSQD (Azerty) : Move
 #### Features, todos and idea box
 
 - [X] Port to Ebiten v2
-- [ ] Proper xollisions
+- [ ] Proper collisions
 - [X] Scale map to 16x16
 - [X] 2D minimap for gun mode
 - [X] Add basic floor/ceiling - **Just a matching png for now**
@@ -43,10 +43,12 @@ Arrows keys or ZSQD (Azerty) : Move
 - [ ] Up/down parallax/Y-xhearing
 - [ ] Ebiten Audio mp3 sound support
 - [ ] Weapon swap/shield
-- [ ] Proper ballistics - **Very very rough prototype, to improve**
-- [ ] Cube destruction/basic enemies - **Very very rough prototype, to improve**
+- [ ] Proper ballistics - **Rough prototype**
+- [ ] Cube destruction/basic enemies - **Rough prototype**
+- [ ] Rebuild the 2D map (where actual raycasting is done) to fit the screen
 
 #### Known bugs
 
 - [ ] Mouse support is very dodgy (blocks keyboard left/right movements)
 - [ ] "scaling issue" -> cubes becomes rectangles from afar
+- [ ] Enemies are seen through walls
