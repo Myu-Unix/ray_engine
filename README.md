@@ -52,3 +52,8 @@ Arrows keys or ZSQD (Azerty) : Move
 - [ ] Mouse support is very dodgy (blocks keyboard left/right movements)
 - [ ] "scaling issue" -> cubes becomes rectangles from afar
 - [ ] Enemies are seen through walls
+
+#### Assets
+
+Gun from Destiny 2 by Bungie
+Scanlines from https://raw.githubusercontent.com/ArcadeAtHomeUK/ArcadeAtHomeUK.github.io/master/Scanlines/1600x1200/Scanlines%20100%25.png

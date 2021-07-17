@@ -29,7 +29,9 @@ var (
 	STATE_MOUSE_SUPPORT = 1
 	STATE_COLLISION     = 0
 	STATE_MINIMAP       = 1
+	STATE_SCANLINES     = 0
 	backgroundImage     *ebiten.Image
+	scanlinesImage      *ebiten.Image
 	splashImage         *ebiten.Image
 	wallImage           *ebiten.Image
 	wallMiniImage       *ebiten.Image
@@ -59,8 +61,8 @@ var (
 	max_dof           int     = 16
 	boot                      = 42
 	mpv_run           []byte
-	engine_version    = "ray_engine 0.7.3"
-	debug_str         = "'Arrow to move, 'k' to exit, 'i' for debug info"
+	engine_version    = "ray_engine 0.7.4"
+	debug_str         = "'Arrow : move, 'k' : exit, 'i' : debug info, 'l' : scanlines"
 	debug_str2        = "'m' : Gun mode/2D map mode, 'f' : fullscreen, j : toogle minimap"
 	str               string
 	map_array         = [256]int{
@@ -221,7 +223,7 @@ func check_verti(screen *ebiten.Image) {
 	// Ballistics. ray 31 is the middle ray
 	if ray == 31 {
 		if mp > 0 && mp < mapX*mapY && map_array[mp] == 2 {
-			ebitenutil.DebugPrint(screen, "\n// DEBUG : Enemy in sight")
+			//ebitenutil.DebugPrint(screen, "\n// DEBUG : Enemy in sight")
 			ENEMY_SIGHT = 1 // Mark "destructible"
 			enemy_mp = mp   // Mark "destructible"
 		} else { // Cannot uncomment those otherwise enemies detection is broken
@@ -233,14 +235,14 @@ func check_verti(screen *ebiten.Image) {
 		rx = vx
 		ry = vy
 		disT = disV
-		COLOR_G = 150
-		COLOR_B = 130
+		COLOR_G = 154
+		COLOR_B = 218
 	} else if disH < disV {
 		rx = hx
 		ry = hy
 		disT = disH
-		COLOR_G = 130
-		COLOR_B = 150
+		COLOR_G = 30
+		COLOR_B = 30
 	}
 
 	// Draw shortest ray based on disT in Orange
@@ -273,12 +275,12 @@ func cast_rays(screen *ebiten.Image) {
 		fix_fisheye()
 
 		// Simple Shading - COLOR_R is handled here
-		if disT >= 64 {
+		if disT >= 128 {
 			COLOR_R = 255
 		} else if disT <= 0 {
 			COLOR_R = 0
 		} else {
-			COLOR_R = uint8(float64(disT * 4))
+			COLOR_R = uint8(float64(disT * 2))
 		}
 
 		// Simplistic and buggy collision detection FIXME
@@ -351,6 +353,9 @@ func (g *game) Draw(screen *ebiten.Image) {
 	if boot > 0 {
 		//boot = boot - 1
 		screen.DrawImage(splashImage, opSplash)
+		if STATE_SCANLINES == 1 {
+			screen.DrawImage(scanlinesImage, opBackground)
+		}
 		if boot == 0 {
 			// Initial values for PDX/PDY, only applied once
 			player_delta_x = math.Cos(player_angle) * 2
@@ -398,12 +403,17 @@ func (g *game) Draw(screen *ebiten.Image) {
 			screen.DrawImage(crossHairImage, opCrosshair)
 		}
 
+		if STATE_SCANLINES == 1 {
+			screen.DrawImage(scanlinesImage, opBackground)
+		}
+
 		// Show debug info
-		str = `{{.newline}} {{.engine_version}} {{.newline}} {{.debug_str}} {{.newline}} {{.debug_str2}} {{.newline}} {{.player_x}} {{.newline}} {{.player_y}} {{.newline}} {{.player_a}} {{.newline}} {{.state_emp}} {{.newline}} {{.state_ms}} {{.newline}} {{.state_co}}`
+		str = `{{.below}} {{.newline}} {{.engine_version}} {{.newline}} {{.debug_str}} {{.newline}} {{.debug_str2}} {{.newline}} {{.player_x}} {{.newline}} {{.player_y}} {{.newline}} {{.player_a}} {{.newline}} {{.state_emp}} {{.newline}} {{.state_ms}} {{.newline}} {{.state_co}}`
 		str = strings.Replace(str, "{{.engine_version}}", engine_version, -1)
 		str = strings.Replace(str, "{{.debug_str}}", debug_str, -1)
 		str = strings.Replace(str, "{{.debug_str2}}", debug_str2, -1)
-		str = strings.Replace(str, "{{.newline}}", "\n                                                                                                ", -1)
+		str = strings.Replace(str, "{{.below}}", "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", -1)
+		str = strings.Replace(str, "{{.newline}}", "\n                        ", -1)
 		str = strings.Replace(str, "{{.player_x}}", fmt.Sprintf("Player X : %f", player_pos_x), -1)
 		str = strings.Replace(str, "{{.player_y}}", fmt.Sprintf("Player Y : %f", player_pos_y), -1)
 		str = strings.Replace(str, "{{.player_a}}", fmt.Sprintf("Player Angle : %f", player_angle), -1)
@@ -454,6 +464,10 @@ func (g *game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeigh
 func main() {
 	var err error
 	backgroundImage, _, err = ebitenutil.NewImageFromFile("imgs/bg_ceiling_floor.png")
+	if err != nil {
+		log.Fatal(err)
+	}
+	scanlinesImage, _, err = ebitenutil.NewImageFromFile("imgs/scanlines.png")
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -23,6 +23,11 @@ func keyboard_handling() {
 	} else {
 		keyStates[ebiten.KeyK] = 0
 	}
+	if ebiten.IsKeyPressed(ebiten.KeyL) {
+		keyStates[ebiten.KeyL]++
+	} else {
+		keyStates[ebiten.KeyL] = 0
+	}
 	if ebiten.IsKeyPressed(ebiten.KeyI) {
 		keyStates[ebiten.KeyI]++
 	} else {
@@ -82,6 +87,13 @@ func keyboard_handling() {
 			STATE_MINIMAP = 1
 		} else {
 			STATE_MINIMAP = 0
+		}
+	}
+	if IsKeyTriggered(ebiten.KeyL) == true {
+		if STATE_SCANLINES == 0 {
+			STATE_SCANLINES = 1
+		} else {
+			STATE_SCANLINES = 0
 		}
 	}
 	if IsKeyTriggered(ebiten.KeyF) == true {
