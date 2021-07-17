@@ -55,5 +55,4 @@ Arrows keys or ZSQD (Azerty) : Move
 
 #### Assets
 
-Gun from Destiny 2 by Bungie
-Scanlines from https://raw.githubusercontent.com/ArcadeAtHomeUK/ArcadeAtHomeUK.github.io/master/Scanlines/1600x1200/Scanlines%20100%25.png
+Gun from Destiny 2 screenshot by Bungie
