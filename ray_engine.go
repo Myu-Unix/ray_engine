@@ -49,8 +49,8 @@ var (
 	CONST_PI2         float64 = CONST_PI / 2
 	CONST_PI3         float64 = (3 * CONST_PI) / 2
 	CONST_DR          float64 = 0.0174533 // one radian in degrees
-	player_pos_x      float64 = 115
-	player_pos_y      float64 = 220
+	player_pos_x      float64 = 36
+	player_pos_y      float64 = 50
 	player_delta_x    float64 = 0
 	player_delta_y    float64 = 0
 	player_angle      float64 = 0
@@ -59,7 +59,7 @@ var (
 	max_dof           int     = 16
 	boot                      = 42
 	mpv_run           []byte
-	engine_version    = "ray_engine 0.7.2"
+	engine_version    = "ray_engine 0.7.3"
 	debug_str         = "'Arrow to move, 'k' to exit, 'i' for debug info"
 	debug_str2        = "'m' : Gun mode/2D map mode, 'f' : fullscreen, j : toogle minimap"
 	str               string
@@ -130,15 +130,15 @@ func check_horiz(screen *ebiten.Image) {
 	hy = player_pos_y
 	aTan = -1 / math.Tan(ra)
 	if ra > CONST_PI {
-		ry = float64(((int(player_pos_y) >> 6) << 6)) - float64(0.0001)
+		ry = float64(((int(player_pos_y) >> 4) << 4)) - float64(0.0001)
 		rx = (player_pos_y-ry)*aTan + player_pos_x
-		yo = -64
+		yo = -16
 		xo = -yo * aTan
 	}
 	if ra < CONST_PI {
-		ry = float64(((int(player_pos_y) >> 6) << 6)) + float64(64)
+		ry = float64(((int(player_pos_y) >> 4) << 4)) + float64(16)
 		rx = (player_pos_y-ry)*aTan + player_pos_x
-		yo = 64
+		yo = 16
 		xo = -yo * aTan
 	}
 	// Looking left or right, will not hit horizontal lines
@@ -148,8 +148,8 @@ func check_horiz(screen *ebiten.Image) {
 		dof = max_dof
 	}
 	for dof < max_dof {
-		mx = (int(rx) >> 6)
-		my = (int(ry) >> 6)
+		mx = (int(rx) >> 4)
+		my = (int(ry) >> 4)
 		mp = my*mapX + mx
 		// Regular walls values are '1', enemies are '2'
 		if mp > 0 && mp < mapX*mapY && map_array[mp] > 0 {
@@ -184,15 +184,15 @@ func check_verti(screen *ebiten.Image) {
 	vy = player_pos_y
 	nTan = -math.Tan(ra)
 	if ra > CONST_PI2 && ra < CONST_PI3 {
-		rx = float64(((int(player_pos_x) >> 6) << 6)) - float64(0.0001)
+		rx = float64(((int(player_pos_x) >> 4) << 4)) - float64(0.0001)
 		ry = (player_pos_x-rx)*nTan + player_pos_y
-		xo = -64
+		xo = -16
 		yo = -xo * nTan
 	}
 	if ra < CONST_PI2 || ra > CONST_PI3 {
-		rx = float64(((int(player_pos_x) >> 6) << 6)) + float64(64)
+		rx = float64(((int(player_pos_x) >> 4) << 4)) + float64(16)
 		ry = (player_pos_x-rx)*nTan + player_pos_y
-		xo = 64
+		xo = 16
 		yo = -xo * nTan
 	}
 	// staight up or down
@@ -202,8 +202,8 @@ func check_verti(screen *ebiten.Image) {
 		dof = max_dof
 	}
 	for dof < max_dof {
-		mx = (int(rx) >> 6)
-		my = (int(ry) >> 6)
+		mx = (int(rx) >> 4)
+		my = (int(ry) >> 4)
 		mp = my*mapX + mx
 		// Regular walls values are '1', enemies are '2'
 		if mp > 0 && mp < mapX*mapY && map_array[mp] > 0 { // was == 1
@@ -233,14 +233,14 @@ func check_verti(screen *ebiten.Image) {
 		rx = vx
 		ry = vy
 		disT = disV
-		COLOR_G = 0
-		COLOR_B = 192
+		COLOR_G = 150
+		COLOR_B = 130
 	} else if disH < disV {
 		rx = hx
 		ry = hy
 		disT = disH
-		COLOR_G = 0
-		COLOR_B = 32
+		COLOR_G = 130
+		COLOR_B = 150
 	}
 
 	// Draw shortest ray based on disT in Orange
@@ -273,23 +273,23 @@ func cast_rays(screen *ebiten.Image) {
 		fix_fisheye()
 
 		// Simple Shading - COLOR_R is handled here
-		if disT >= 255 {
+		if disT >= 64 {
 			COLOR_R = 255
 		} else if disT <= 0 {
 			COLOR_R = 0
 		} else {
-			COLOR_R = uint8(float64(disT))
+			COLOR_R = uint8(float64(disT * 4))
 		}
 
 		// Simplistic and buggy collision detection FIXME
-		if disT <= 16 {
+		if disT <= 4 {
 			STATE_COLLISION = 1
 		} else {
 			STATE_COLLISION = 0
 		}
 
 		// Draw lines on 3D map section
-		lineH = float64(64*320) / disT
+		lineH = float64(16*320) / disT
 		if lineH > float64(320) {
 			lineH = float64(320)
 		}
@@ -353,8 +353,8 @@ func (g *game) Draw(screen *ebiten.Image) {
 		screen.DrawImage(splashImage, opSplash)
 		if boot == 0 {
 			// Initial values for PDX/PDY, only applied once
-			player_delta_x = math.Cos(player_angle) * 5
-			player_delta_y = math.Sin(player_angle) * 5
+			player_delta_x = math.Cos(player_angle) * 2
+			player_delta_y = math.Sin(player_angle) * 2
 		}
 	} else {
 		screen.DrawImage(backgroundImage, opBackground)
@@ -362,16 +362,16 @@ func (g *game) Draw(screen *ebiten.Image) {
 		if STATE_SHOW_2D_MAP == 1 {
 			for i := 0; i < mapX; i++ {
 				for j := 0; j < mapY; j++ {
-					if map_array[i*mapX+j] == 1 {
+					if map_array[i*mapX+j] > 0 {
 						opwall := &ebiten.DrawImageOptions{}
 						opwall.GeoM.Translate(wall_posx, wall_posy)
 						screen.DrawImage(wallImage, opwall)
 					}
-					if wall_posx < 960 { // 1024-64
-						wall_posx += 64
+					if wall_posx < 240 { // 256 (16*16) - 16 (wall size in px). Was 960 = 1024-64
+						wall_posx += 16
 					} else {
 						wall_posx = 0
-						wall_posy += 64
+						wall_posy += 16
 					}
 				}
 			}
@@ -417,15 +417,15 @@ func (g *game) Draw(screen *ebiten.Image) {
 
 	/* Keyboard - FIXME When running in goroutine, it somewhat breaks the mouse support.
 	not possible to move left/right either */
-	go keyboard_handling()
+	keyboard_handling()
 
 	// Mouse support is ALPHA
 	if STATE_MOUSE_SUPPORT == 1 {
 		ebiten.SetCursorMode(ebiten.CursorModeCaptured)
 		x, y = ebiten.CursorPosition()
 		player_angle = float64(x) / 360 // Breaks left/right on keyboard
-		player_delta_x = math.Cos(player_angle) * 5
-		player_delta_y = math.Sin(player_angle) * 5
+		player_delta_x = math.Cos(player_angle) * 2
+		player_delta_y = math.Sin(player_angle) * 2
 		// Mouse buttons
 		if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
 			// Ballistics

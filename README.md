@@ -45,7 +45,7 @@ Arrows keys or ZSQD (Azerty) : Move
 - [ ] Weapon swap/shield
 - [ ] Proper ballistics - **Rough prototype**
 - [ ] Cube destruction/basic enemies - **Rough prototype**
-- [ ] Rebuild the 2D map (where actual raycasting is done) to fit the screen
+- [X] Rebuild the 2D map (where actual raycasting is done) to fit the screen
 
 #### Known bugs
 

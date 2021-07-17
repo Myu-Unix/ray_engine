@@ -32,6 +32,6 @@ func draw_minimap(screen *ebiten.Image) {
 		wall_minimap_posy = 350
 
 		// Draw player as a rect
-		ebitenutil.DrawRect(screen, float64((player_pos_x/8)+wall_minimap_posx), float64((player_pos_y/8)+wall_minimap_posy), 4, 4, color.RGBA{196, 255, 0, 255})
+		ebitenutil.DrawRect(screen, float64((player_pos_x/2)+wall_minimap_posx), float64((player_pos_y/2)+wall_minimap_posy), 4, 4, color.RGBA{196, 255, 0, 255})
 	}
 }
