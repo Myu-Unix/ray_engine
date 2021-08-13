@@ -363,8 +363,8 @@ func (g *game) Draw(screen *ebiten.Image) {
 			player_delta_x = math.Cos(player_angle) * 2
 			player_delta_y = math.Sin(player_angle) * 2
 			// Add 90 degrees in radians to get the right angle of player_angle
-			player_strafe_delta_x = math.Cos(player_angle+1.5708) * 2
-			player_strafe_delta_y = math.Sin(player_angle+1.5708) * 2
+			player_strafe_delta_x = math.Cos(player_angle+(math.Pi/2)) * 2
+			player_strafe_delta_y = math.Sin(player_angle+(math.Pi/2)) * 2
 		}
 	} else {
 		screen.DrawImage(backgroundImage, opBackground)
@@ -442,8 +442,8 @@ func (g *game) Draw(screen *ebiten.Image) {
 		player_delta_x = math.Cos(player_angle) * 2
 		player_delta_y = math.Sin(player_angle) * 2
 		// Add 90 degrees in radians to get the right angle of player_angle
-		player_strafe_delta_x = math.Cos(player_angle+1.5708) * 2
-		player_strafe_delta_y = math.Sin(player_angle+1.5708) * 2
+		player_strafe_delta_x = math.Cos(player_angle+(math.Pi/2)) * 2
+		player_strafe_delta_y = math.Sin(player_angle+(math.Pi/2)) * 2
 		// Mouse buttons
 		if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
 			// Ballistics
