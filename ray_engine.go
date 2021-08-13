@@ -38,36 +38,36 @@ var (
 	wallEnemyImage      *ebiten.Image
 	gunImage            *ebiten.Image
 	//Enemy3DImage        *ebiten.Image
-	crossHairImage    *ebiten.Image
-	fireImage         *ebiten.Image
-	keyStates                 = map[ebiten.Key]int{}
-	bg_posx           float64 = 0
-	bg_posy           float64 = 0
-	wall_posx         float64 = 0
-	wall_posy         float64 = 0
-	wall_minimap_posx float64 = 20
-	wall_minimap_posy float64 = 350
-	CONST_PI          float64 = 3.1415926535
-	CONST_PI2         float64 = CONST_PI / 2
-	CONST_PI3         float64 = (3 * CONST_PI) / 2
-	CONST_DR          float64 = 0.0174533 // one radian in degrees
-	player_pos_x      float64 = 36
-	player_pos_y      float64 = 50
-	player_delta_x    float64 = 0
-	player_delta_y    float64 = 0
-	player_strafe_delta_x	float64 = 0
+	crossHairImage        *ebiten.Image
+	fireImage             *ebiten.Image
+	keyStates                     = map[ebiten.Key]int{}
+	bg_posx               float64 = 0
+	bg_posy               float64 = 0
+	wall_posx             float64 = 0
+	wall_posy             float64 = 0
+	wall_minimap_posx     float64 = 20
+	wall_minimap_posy     float64 = 350
+	CONST_PI              float64 = 3.1415926535
+	CONST_PI2             float64 = CONST_PI / 2
+	CONST_PI3             float64 = (3 * CONST_PI) / 2
+	CONST_DR              float64 = 0.0174533 // one radian in degrees
+	player_pos_x          float64 = 36
+	player_pos_y          float64 = 50
+	player_delta_x        float64 = 0
+	player_delta_y        float64 = 0
+	player_strafe_delta_x float64 = 0
 	player_strafe_delta_y float64 = 0
-	player_angle      float64 = 0
-	mapX              int     = 16
-	mapY              int     = 16
-	max_dof           int     = 16
-	boot                      = 42
-	mpv_run           []byte
-	engine_version    = "ray_engine 0.7.5"
-	debug_str         = "'Arrow : move, 'k' : exit, 'i' : debug info, 'l' : scanlines"
-	debug_str2        = "'m' : Gun mode/2D map mode, 'f' : fullscreen, j : toogle minimap"
-	str               string
-	map_array         = [256]int{
+	player_angle          float64 = 0
+	mapX                  int     = 16
+	mapY                  int     = 16
+	max_dof               int     = 16
+	boot                          = 42
+	mpv_run               []byte
+	engine_version        = "ray_engine 0.7.5"
+	debug_str             = "'Arrow : move, 'k' : exit, 'i' : debug info, 'l' : scanlines"
+	debug_str2            = "'m' : Gun mode/2D map mode, 'f' : fullscreen, j : toogle minimap"
+	str                   string
+	map_array             = [256]int{
 		1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 		1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
 		1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
@@ -361,7 +361,7 @@ func (g *game) Draw(screen *ebiten.Image) {
 		if boot == 0 {
 			// Initial values for PDX/PDY, only applied once
 			player_delta_x = math.Cos(player_angle) * 2
-			player_delta_y = math.Sin(player_angle) * 2			
+			player_delta_y = math.Sin(player_angle) * 2
 			// Add 90 degrees in radians to get the right angle of player_angle
 			player_strafe_delta_x = math.Cos(player_angle+1.5708) * 2
 			player_strafe_delta_y = math.Sin(player_angle+1.5708) * 2
