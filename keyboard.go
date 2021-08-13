@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/hajimehoshi/ebiten/v2"
-	"math"
 	"os"
+
+	"github.com/hajimehoshi/ebiten/v2"
 )
 
 func keyboard_handling() {
