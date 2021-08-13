@@ -55,6 +55,8 @@ var (
 	player_pos_y      float64 = 50
 	player_delta_x    float64 = 0
 	player_delta_y    float64 = 0
+	player_strafe_delta_x	float64 = 0
+	player_strafe_delta_y float64 = 0
 	player_angle      float64 = 0
 	mapX              int     = 16
 	mapY              int     = 16
@@ -359,7 +361,10 @@ func (g *game) Draw(screen *ebiten.Image) {
 		if boot == 0 {
 			// Initial values for PDX/PDY, only applied once
 			player_delta_x = math.Cos(player_angle) * 2
-			player_delta_y = math.Sin(player_angle) * 2
+			player_delta_y = math.Sin(player_angle) * 2			
+			// Add 90 degrees in radians to get the right angle of player_angle
+			player_strafe_delta_x = math.Cos(player_angle+1.5708) * 2
+			player_strafe_delta_y = math.Sin(player_angle+1.5708) * 2
 		}
 	} else {
 		screen.DrawImage(backgroundImage, opBackground)
@@ -436,6 +441,9 @@ func (g *game) Draw(screen *ebiten.Image) {
 		player_angle = float64(x) / 360 // Breaks left/right on keyboard
 		player_delta_x = math.Cos(player_angle) * 2
 		player_delta_y = math.Sin(player_angle) * 2
+		// Add 90 degrees in radians to get the right angle of player_angle
+		player_strafe_delta_x = math.Cos(player_angle+1.5708) * 2
+		player_strafe_delta_y = math.Sin(player_angle+1.5708) * 2
 		// Mouse buttons
 		if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
 			// Ballistics
