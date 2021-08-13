@@ -53,22 +53,12 @@ func keyboard_handling() {
 			player_pos_y = player_pos_y - player_delta_y
 		}
 		if ebiten.IsKeyPressed(ebiten.KeyLeft) || ebiten.IsKeyPressed(ebiten.KeyA) { // Q Azerty
-			player_angle -= 0.05
-			// Reset
-			if player_angle <= 0 {
-				player_angle = 6.283
-			}
-			player_delta_x = math.Cos(player_angle) * 5
-			player_delta_y = math.Sin(player_angle) * 5
+			player_pos_x = player_pos_x - player_strafe_delta_x
+			player_pos_y = player_pos_y - player_strafe_delta_y
 		}
 		if ebiten.IsKeyPressed(ebiten.KeyRight) || ebiten.IsKeyPressed(ebiten.KeyD) { // D
-			player_angle += 0.05
-			// Reset
-			if player_angle >= 6.283 {
-				player_angle = 0
-			}
-			player_delta_x = math.Cos(player_angle) * 5
-			player_delta_y = math.Sin(player_angle) * 5
+			player_pos_x = player_pos_x + player_strafe_delta_x
+			player_pos_y = player_pos_y + player_strafe_delta_y
 		}
 	}
 	if IsKeyTriggered(ebiten.KeyM) == true {
