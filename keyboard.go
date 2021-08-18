@@ -71,7 +71,7 @@ func keyboard_handling() {
 			player_delta_y = math.Sin(player_angle) * 5
 		}
 	}
-	if IsKeyTriggered(ebiten.KeyM) == true {
+	if IsKeyTriggered(ebiten.KeyM) {
 		if STATE_SHOW_2D_MAP == 0 {
 			STATE_SHOW_2D_MAP = 1
 			STATE_MINIMAP = 0
@@ -82,21 +82,21 @@ func keyboard_handling() {
 			x3d_orig = 0
 		}
 	}
-	if IsKeyTriggered(ebiten.KeyJ) == true {
+	if IsKeyTriggered(ebiten.KeyJ) {
 		if STATE_MINIMAP == 0 {
 			STATE_MINIMAP = 1
 		} else {
 			STATE_MINIMAP = 0
 		}
 	}
-	if IsKeyTriggered(ebiten.KeyL) == true {
+	if IsKeyTriggered(ebiten.KeyL) {
 		if STATE_SCANLINES == 0 {
 			STATE_SCANLINES = 1
 		} else {
 			STATE_SCANLINES = 0
 		}
 	}
-	if IsKeyTriggered(ebiten.KeyF) == true {
+	if IsKeyTriggered(ebiten.KeyF) {
 		if STATE_FULLSCREEN == 0 {
 			ebiten.SetFullscreen(true)
 			STATE_FULLSCREEN = 1
@@ -105,17 +105,17 @@ func keyboard_handling() {
 			STATE_FULLSCREEN = 0
 		}
 	}
-	if IsKeyTriggered(ebiten.KeyI) == true {
+	if IsKeyTriggered(ebiten.KeyI) {
 		if STATE_SHOW_DEBUG == 0 {
 			STATE_SHOW_DEBUG = 1
 		} else {
 			STATE_SHOW_DEBUG = 0
 		}
 	}
-	if IsKeyTriggered(ebiten.KeyK) == true {
+	if IsKeyTriggered(ebiten.KeyK) {
 		os.Exit(0)
 	}
-	if IsKeyTriggered(ebiten.KeyEnter) == true {
+	if IsKeyTriggered(ebiten.KeyEnter) {
 		boot = 0
 	}
 }
