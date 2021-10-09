@@ -51,40 +51,23 @@ var (
 	CONST_PI2             float64 = CONST_PI / 2
 	CONST_PI3             float64 = (3 * CONST_PI) / 2
 	CONST_DR              float64 = 0.0174533 // one radian in degrees
-	player_pos_x          float64 = 36
-	player_pos_y          float64 = 50
+	player_pos_x          float64
+	player_pos_y          float64
 	player_delta_x        float64 = 0
 	player_delta_y        float64 = 0
 	player_strafe_delta_x float64 = 0
 	player_strafe_delta_y float64 = 0
 	player_angle          float64 = 0
-	mapX                  int     = 16
-	mapY                  int     = 16
-	max_dof               int     = 16
-	boot                          = 42
+	mapX                  int
+	mapY                  int
+	max_dof               int = 16
+	boot                      = 42
 	mpv_run               []byte
 	engine_version        = "ray_engine 0.7.5"
 	debug_str             = "'Arrow : move, 'k' : exit, 'i' : debug info, 'l' : scanlines"
 	debug_str2            = "'m' : Gun mode/2D map mode, 'f' : fullscreen, j : toogle minimap"
 	str                   string
-	map_array             = [256]int{
-		1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-		1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-		1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-		1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-		1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-		1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-		1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-		1, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 1,
-		1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 1,
-		1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-		1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-		1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1,
-		1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1,
-		1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1,
-		1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-		1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-	}
+	map_array             []int
 	// Rays vars
 	r, mx, my, mp, dof                 int
 	rx, ry, ra, xo, yo, hx, hy, vx, vy float64
@@ -470,6 +453,8 @@ func (g *game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeigh
 }
 
 func main() {
+	config()
+
 	var err error
 	backgroundImage, _, err = ebitenutil.NewImageFromFile("imgs/bg_ceiling_floor.png")
 	if err != nil {
@@ -511,6 +496,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	fmt.Println(engine_version)
 	ebiten.SetWindowTitle(engine_version)
 	ebiten.SetWindowSize(1024, 512)
