@@ -1,5 +1,5 @@
 /*
-ray_engine by Myu-Unix - Sept 2020
+ray_engine by Myu-Unix - Sept 2020 - Jan 2022
 Inspired by 3DSage's C/OpenGL raycasting engine : https://www.youtube.com/watch?v=gYRrGTC7GtA
 */
 
@@ -7,11 +7,9 @@ package main
 
 import (
 	"fmt"
-
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
-
 	"image/color"
 	_ "image/png"
 	"log"
@@ -63,17 +61,17 @@ var (
 	max_dof               int     = 16
 	boot                          = 42
 	mpv_run               []byte
-	engine_version        = "ray_engine 0.7.5"
+	engine_version        = "ray_engine 0.8.0"
 	debug_str             = "'Arrow : move, 'k' : exit, 'i' : debug info, 'l' : scanlines"
 	debug_str2            = "'m' : Gun mode/2D map mode, 'f' : fullscreen, j : toogle minimap"
 	str                   string
 	map_array             = [256]int{
 		1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-		1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-		1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-		1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+		1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1,
+		1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1,
+		1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1,
 		1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-		1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+		1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
 		1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
 		1, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 1,
 		1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 1,
@@ -81,8 +79,8 @@ var (
 		1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
 		1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1,
 		1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1,
-		1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1,
-		1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+		1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1,
+		1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1,
 		1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 	}
 	// Rays vars
@@ -104,8 +102,8 @@ var (
 	x int = 0
 	y int = 0
 	// Gun vars
-	gunx          float64 = 512
-	guny          float64 = 350
+	gunx          float64 = 512 // 512 ith gun1
+	guny          float64 = 350 // 350 with gun1
 	reset_gun_pos         = 0
 	// Ballistic vars
 	center_x        float64 = 480 // 1024/2 - 32 (which is half the crosshair size)
@@ -161,7 +159,7 @@ func check_horiz(screen *ebiten.Image) {
 			hx = rx
 			hy = ry
 			// ax ay bx by ang
-			disH = math.Sqrt((hx-player_pos_x)*(hx-player_pos_x) + (hy-player_pos_y)*(hy-player_pos_y))
+			disH = math.Sqrt(((hx - player_pos_x) * (hx - player_pos_x)) + ((hy - player_pos_y) * (hy - player_pos_y)))
 		} else {
 			rx = rx + xo
 			ry = ry + yo
@@ -215,7 +213,7 @@ func check_verti(screen *ebiten.Image) {
 			vx = rx
 			vy = ry
 			// ax ay bx by ang
-			disV = math.Sqrt((vx-player_pos_x)*(vx-player_pos_x) + (vy-player_pos_y)*(vy-player_pos_y))
+			disV = math.Sqrt(((vx - player_pos_x) * (vx - player_pos_x)) + ((vy - player_pos_y) * (vy - player_pos_y)))
 		} else {
 			rx = rx + xo
 			ry = ry + yo
@@ -284,6 +282,7 @@ func cast_rays(screen *ebiten.Image) {
 		} else {
 			COLOR_R = uint8(float64(disT * 2))
 		}
+		//COLOR_R = 0
 
 		// Simplistic and buggy collision detection FIXME
 		if disT <= 4 {
@@ -293,19 +292,20 @@ func cast_rays(screen *ebiten.Image) {
 		}
 
 		// Draw lines on 3D map section
-		lineH = float64(16*512) / disT
-		if lineH > float64(512) {
-			lineH = float64(512)
+		lineH = float64(16*800) / disT
+		if lineH > float64(800) {
+			lineH = float64(800)
 		}
 
 		// Basic Line offset
-		lineO = 160 - (lineH / float64(3)) // was 2 (int) but >2 helps with perspective somehow
+		lineO = 256 - float64(lineH/2)
 
 		// x, y, ray@16px x64 = 1024, lineH
 		if mp > 0 && mp < mapX*mapY && map_array[mp] == 2 {
-			ebitenutil.DrawRect(screen, float64(x3d), float64(lineO), float64(16), lineH+lineO, color.RGBA{255, 255, 255, 255})
+			ebitenutil.DrawRect(screen, float64(x3d), float64(lineO), float64(16), lineH, color.RGBA{255, 255, 255, 255})
 		} else {
-			ebitenutil.DrawRect(screen, float64(x3d), float64(lineO), float64(16), lineH+lineO, color.RGBA{COLOR_R, COLOR_G, COLOR_B, 240})
+			ebitenutil.DrawRect(screen, float64(x3d), float64(lineO), float64(16), lineH, color.RGBA{COLOR_R, COLOR_G, COLOR_B, 240})
+			//ebitenutil.DrawRect(screen, float64(x3d), float64(lineO), float64(16), lineH+lineO, color.RGBA{COLOR_R, COLOR_G, COLOR_B, 240})
 		}
 
 		// Blit image on '2' blocks
@@ -368,30 +368,9 @@ func (g *game) Draw(screen *ebiten.Image) {
 		}
 	} else {
 		screen.DrawImage(backgroundImage, opBackground)
-		// Draw 2D map
-		if STATE_SHOW_2D_MAP == 1 {
-			for i := 0; i < mapX; i++ {
-				for j := 0; j < mapY; j++ {
-					if map_array[i*mapX+j] > 0 {
-						opwall := &ebiten.DrawImageOptions{}
-						opwall.GeoM.Translate(wall_posx, wall_posy)
-						screen.DrawImage(wallImage, opwall)
-					}
-					if wall_posx < 240 { // 256 (16*16) - 16 (wall size in px). Was 960 = 1024-64
-						wall_posx += 16
-					} else {
-						wall_posx = 0
-						wall_posy += 16
-					}
-				}
-			}
-			wall_posx = 0
-			wall_posy = 0
 
-			// Draw player as a rect
-			ebitenutil.DrawRect(screen, float64(player_pos_x), float64(player_pos_y), 12, 12, color.Black)
-			ebitenutil.DrawRect(screen, float64(player_pos_x), float64(player_pos_y), 4, 4, color.RGBA{255, 100, 100, 255})
-		}
+		// 2D Map if enabled
+		show2DMap(screen)
 
 		// Raycasting
 		cast_rays(screen)
@@ -479,7 +458,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	splashImage, _, err = ebitenutil.NewImageFromFile("imgs/splash_dev.png")
+	splashImage, _, err = ebitenutil.NewImageFromFile("imgs/splash_08.png")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -530,4 +509,32 @@ func gun_sound() {
 	if errA != nil {
 		fmt.Printf("Error playing sound\n")
 	}
+}
+
+func show2DMap(screen *ebiten.Image) {
+	// Draw 2D map
+	if STATE_SHOW_2D_MAP == 1 {
+		for i := 0; i < mapX; i++ {
+			for j := 0; j < mapY; j++ {
+				if map_array[i*mapX+j] > 0 {
+					opwall := &ebiten.DrawImageOptions{}
+					opwall.GeoM.Translate(wall_posx, wall_posy)
+					screen.DrawImage(wallImage, opwall)
+				}
+				if wall_posx < 240 { // 256 (16*16) - 16 (wall size in px). Was 960 = 1024-64
+					wall_posx += 16
+				} else {
+					wall_posx = 0
+					wall_posy += 16
+				}
+			}
+		}
+		wall_posx = 0
+		wall_posy = 0
+
+		// Draw player as a rect
+		ebitenutil.DrawRect(screen, float64(player_pos_x), float64(player_pos_y), 12, 12, color.Black)
+		ebitenutil.DrawRect(screen, float64(player_pos_x), float64(player_pos_y), 4, 4, color.RGBA{255, 100, 100, 255})
+	}
+
 }
