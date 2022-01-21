@@ -28,6 +28,8 @@ Arrows keys or ZSQD (Azerty) : Move
 
 'f' : fullscreen toogle
 
+'l' : scanlines
+
 'm' : Gun mode
 
 'k' : quit
@@ -49,8 +51,6 @@ Arrows keys or ZSQD (Azerty) : Move
 
 #### Known bugs
 
-- [ ] Mouse support is very dodgy (blocks keyboard left/right movements)
-- [ ] "scaling issue" -> cubes becomes rectangles from afar
 - [ ] Enemies are seen through walls
 
 #### Assets
