@@ -21,12 +21,12 @@ import (
 type game struct{}
 
 var (
-	STATE_SHOW_DEBUG    = 1
+	STATE_SHOW_DEBUG    = 0
 	STATE_SHOW_2D_MAP   = 0
 	STATE_FULLSCREEN    = 0
 	STATE_MOUSE_SUPPORT = 1
 	STATE_COLLISION     = 0
-	STATE_MINIMAP       = 1
+	STATE_MINIMAP       = 0
 	STATE_SCANLINES     = 0
 	backgroundImage     *ebiten.Image
 	scanlinesImage      *ebiten.Image
@@ -35,10 +35,9 @@ var (
 	wallMiniImage       *ebiten.Image
 	wallEnemyImage      *ebiten.Image
 	gunImage            *ebiten.Image
-	//Enemy3DImage        *ebiten.Image
-	crossHairImage        *ebiten.Image
-	fireImage             *ebiten.Image
-	keyStates                     = map[ebiten.Key]int{}
+	crossHairImage      *ebiten.Image
+	fireImage           *ebiten.Image
+	keyStates = map[ebiten.Key]int{}
 	bg_posx               float64 = 0
 	bg_posy               float64 = 0
 	wall_posx             float64 = 0
@@ -59,19 +58,19 @@ var (
 	mapX                  int     = 16
 	mapY                  int     = 16
 	max_dof               int     = 16
-	boot                          = 42
+	boot                          = 1
 	mpv_run               []byte
-	engine_version        = "ray_engine 0.8.0"
+	engine_version        = "ray_engine 0.8.1"
 	debug_str             = "'Arrow : move, 'k' : exit, 'i' : debug info, 'l' : scanlines"
 	debug_str2            = "'m' : Gun mode/2D map mode, 'f' : fullscreen, j : toogle minimap"
 	str                   string
 	map_array             = [256]int{
 		1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-		1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1,
+		1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1,
 		1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1,
 		1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1,
-		1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-		1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+		1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+		1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
 		1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
 		1, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 1,
 		1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 1,
@@ -83,6 +82,7 @@ var (
 		1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1,
 		1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 	}
+
 	// Rays vars
 	r, mx, my, mp, dof                 int
 	rx, ry, ra, xo, yo, hx, hy, vx, vy float64
@@ -111,7 +111,6 @@ var (
 	override_colors         = 0
 	ENEMY_SIGHT             = 0
 	enemy_mp        int     = 0
-	MP_120_BLIT     int     = 0
 )
 
 func fix_fisheye() {
@@ -226,9 +225,6 @@ func check_verti(screen *ebiten.Image) {
 			//ebitenutil.DebugPrint(screen, "\n// DEBUG : Enemy in sight")
 			ENEMY_SIGHT = 1 // Mark "destructible"
 			enemy_mp = mp   // Mark "destructible"
-		} else { // Cannot uncomment those otherwise enemies detection is broken
-			//ENEMY_SIGHT = 0
-			//enemy_mp = 0
 		}
 	}
 	if disV < disH {
@@ -236,13 +232,13 @@ func check_verti(screen *ebiten.Image) {
 		ry = vy
 		disT = disV
 		COLOR_G = 0
-		COLOR_B = 255
+		COLOR_R = 192
 	} else if disH < disV {
 		rx = hx
 		ry = hy
 		disT = disH
 		COLOR_G = 0
-		COLOR_B = 96
+		COLOR_R = 64
 	}
 
 	// Draw shortest ray based on disT in Orange
@@ -254,6 +250,17 @@ func check_verti(screen *ebiten.Image) {
 	}
 	if ra > (2 * CONST_PI) {
 		ra = ra - (2 * CONST_PI)
+	}
+}
+
+func simple_shading() {
+	// Simple Shading - COLOR_G is handled here
+	if disT >= 128 {
+		COLOR_B = 255
+	} else if disT <= 0 {
+		COLOR_B = 0
+	} else {
+		COLOR_B = uint8(float64(disT * 2))
 	}
 }
 
@@ -273,16 +280,8 @@ func cast_rays(screen *ebiten.Image) {
 		check_verti(screen)
 		// Fix fisheye effect
 		fix_fisheye()
-
-		// Simple Shading - COLOR_R is handled here
-		if disT >= 128 {
-			COLOR_R = 255
-		} else if disT <= 0 {
-			COLOR_R = 0
-		} else {
-			COLOR_R = uint8(float64(disT * 2))
-		}
-		//COLOR_R = 0
+		//Shading
+		simple_shading()
 
 		// Simplistic and buggy collision detection FIXME
 		if disT <= 4 {
@@ -297,34 +296,32 @@ func cast_rays(screen *ebiten.Image) {
 			lineH = float64(800)
 		}
 
-		// Basic Line offset
+		// Basic Y Line offset
 		lineO = 256 - float64(lineH/2)
+		// Basic Y Line offset and up/down "shearing"
+		//lineO = 256 - float64(lineH/2) -float64(y/4)
 
 		// x, y, ray@16px x64 = 1024, lineH
-		if mp > 0 && mp < mapX*mapY && map_array[mp] == 2 {
+		if mp > 0 && mp < mapX*mapY && map_array[mp] == 2 { // Enemy cube
 			ebitenutil.DrawRect(screen, float64(x3d), float64(lineO), float64(16), lineH, color.RGBA{255, 255, 255, 255})
 		} else {
-			ebitenutil.DrawRect(screen, float64(x3d), float64(lineO), float64(16), lineH, color.RGBA{COLOR_R, COLOR_G, COLOR_B, 240})
-			//ebitenutil.DrawRect(screen, float64(x3d), float64(lineO), float64(16), lineH+lineO, color.RGBA{COLOR_R, COLOR_G, COLOR_B, 240})
-		}
-
-		// Blit image on '2' blocks
-		/*if mp > 0 && mp < mapX*mapY && map_array[mp] == 2 {
-			if MP_120_BLIT == 0 {
-				x3d_save := x3d + 32
-				lineO_save := lineO + 72
-				opX := &ebiten.DrawImageOptions{}
-				opX.GeoM.Translate(x3d_save, lineO_save)
-				screen.DrawImage(Enemy3DImage, opX)
-				MP_120_BLIT = 1
+			// Draw each pixel from lineH
+			// Before : ebitenutil.DrawRect(screen, float64(x3d), float64(lineO), float64(16), lineH, color.RGBA{COLOR_R, COLOR_G, COLOR_B, 255})
+			//ebitenutil.DrawRect(screen, float64(x3d), float64(lineO), float64(16), lineH, color.RGBA{COLOR_R, COLOR_G, COLOR_B, 255})
+			img_pixel:=0
+			for ypixel := 0; float64(ypixel) < lineH; ypixel++ {
+					RED := texture_img_array[img_pixel+0]
+					GREEN := texture_img_array[img_pixel+1]
+					BLUE := texture_img_array[img_pixel+2]
+			  ebitenutil.DrawRect(screen, float64(x3d), float64(lineO), float64(16), float64(ypixel), color.RGBA{uint8(RED), uint8(GREEN), uint8(BLUE), 255})
+			  img_pixel+=3
 			}
-		}*/
+		}
 
 		x3d = x3d + 16
 		ra = (ra + CONST_DR) // increment
 	}
 	x3d = x3d_orig
-	MP_120_BLIT = 0
 }
 
 func (g *game) Draw(screen *ebiten.Image) {
@@ -341,7 +338,7 @@ func (g *game) Draw(screen *ebiten.Image) {
 	opwall.GeoM.Translate(wall_posx, wall_posy)
 	opGun.GeoM.Translate(gunx, guny)
 	opCrosshair.GeoM.Translate(center_x, center_y)
-	opFire.GeoM.Translate(512, 385)
+	opFire.GeoM.Translate(522, 386)
 
 	// Reset gun position after firing
 	if reset_gun_pos > 0 {
@@ -371,10 +368,8 @@ func (g *game) Draw(screen *ebiten.Image) {
 
 		// 2D Map if enabled
 		show2DMap(screen)
-
 		// Raycasting
 		cast_rays(screen)
-
 		// Draw minimap
 		draw_minimap(screen)
 
@@ -417,7 +412,7 @@ func (g *game) Draw(screen *ebiten.Image) {
 	if STATE_MOUSE_SUPPORT == 1 {
 		ebiten.SetCursorMode(ebiten.CursorModeCaptured)
 		x, y = ebiten.CursorPosition()
-		player_angle = float64(x) / 360 // Breaks left/right on keyboard
+		player_angle = float64(x) / 360
 		player_delta_x = math.Cos(player_angle) * 2
 		player_delta_y = math.Sin(player_angle) * 2
 		// Add 90 degrees in radians to get the right angle of player_angle
@@ -433,11 +428,29 @@ func (g *game) Draw(screen *ebiten.Image) {
 			}
 			go gun_sound()
 			screen.DrawImage(fireImage, opFire)
-			gunx = gunx + 4
-			guny = guny - 2
+			guny = guny - 12
 			reset_gun_pos = 4
 		}
 	}
+
+// TEXTURE test
+if boot > 0 {
+pixel_x:=32
+pixel_y:=340
+for y := 0; y < 32; y++ {
+  for x := 0; x < 32; x++ {
+  pixel := (y*32+x)*3
+	RED := texture_img_array[pixel+0]
+	GREEN := texture_img_array[pixel+1]
+	BLUE := texture_img_array[pixel+2]
+	ebitenutil.DrawRect(screen, float64(pixel_x), float64(pixel_y), float64(4), 4	, color.RGBA{uint8(RED), uint8(GREEN), uint8(BLUE), 255})
+	pixel_x+=4
+	}
+	pixel_y+=4
+	pixel_x=32
+	}
+}
+	fmt.Println(ebiten.CurrentFPS())
 }
 
 func (g *game) Update() error {
@@ -454,7 +467,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	scanlinesImage, _, err = ebitenutil.NewImageFromFile("imgs/scanlines.png")
+	scanlinesImage, _, err = ebitenutil.NewImageFromFile("imgs/scanlines2.png")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -474,15 +487,11 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	gunImage, _, err = ebitenutil.NewImageFromFile("imgs/gun2.png")
+	gunImage, _, err = ebitenutil.NewImageFromFile("imgs/gun_pixelized.png")
 	if err != nil {
 		log.Fatal(err)
 	}
-	/*Enemy3DImage, _, err = ebitenutil.NewImageFromFile("imgs/enemy_test2.png")
-	if err != nil {
-		log.Fatal(err)
-	}*/
-	crossHairImage, _, err = ebitenutil.NewImageFromFile("imgs/crosshair.png")
+	crossHairImage, _, err = ebitenutil.NewImageFromFile("imgs/crosshair_dot.png")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -493,6 +502,7 @@ func main() {
 	fmt.Println(engine_version)
 	ebiten.SetWindowTitle(engine_version)
 	ebiten.SetWindowSize(1024, 512)
+	//ebiten.SetCursorMode(CursorModeCaptured)
 	g := &game{}
 	ebiten.RunGame(g)
 }
@@ -504,7 +514,7 @@ func IsKeyTriggered(key ebiten.Key) bool {
 // CHANGEME
 func gun_sound() {
 	var errA error
-	mpv_cmd := fmt.Sprintf("mpv --really-quiet --volume=42 sound/gun.mp3")
+	mpv_cmd := fmt.Sprintf("/Applications/mpv.app/Contents/MacOS/mpv --really-quiet --volume=42 sound/gun.mp3")
 	mpv_run, errA = exec.Command("bash", "-c", mpv_cmd).Output()
 	if errA != nil {
 		fmt.Printf("Error playing sound\n")
@@ -521,7 +531,7 @@ func show2DMap(screen *ebiten.Image) {
 					opwall.GeoM.Translate(wall_posx, wall_posy)
 					screen.DrawImage(wallImage, opwall)
 				}
-				if wall_posx < 240 { // 256 (16*16) - 16 (wall size in px). Was 960 = 1024-64
+				if wall_posx < 240 { // 256 (16*16) - 16 (wall size in px).
 					wall_posx += 16
 				} else {
 					wall_posx = 0
@@ -531,10 +541,8 @@ func show2DMap(screen *ebiten.Image) {
 		}
 		wall_posx = 0
 		wall_posy = 0
-
 		// Draw player as a rect
 		ebitenutil.DrawRect(screen, float64(player_pos_x), float64(player_pos_y), 12, 12, color.Black)
 		ebitenutil.DrawRect(screen, float64(player_pos_x), float64(player_pos_y), 4, 4, color.RGBA{255, 100, 100, 255})
 	}
-
 }

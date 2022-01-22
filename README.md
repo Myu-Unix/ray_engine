@@ -4,13 +4,17 @@
 
 Heavily based on [3DSage fantastic Youtube videos of a C/OpenGL raycasting engine](https://www.youtube.com/watch?v=gYRrGTC7GtA)
 
-_Gun mode !_
+_Gun mode ! (old version of the engine with scaling issues)_
 
 ![img](other_imgs/engine.gif) 
 
 _2D map rendered in 3D_
 
 ![img](other_imgs/screenie.png)
+
+_CRT scanlines-
+
+![img](other_imgs/screenie_crt.png)
 
 
 #### Build & run
@@ -38,10 +42,11 @@ Arrows keys or ZSQD (Azerty) : Move
 
 - [X] Port to Ebiten v2
 - [ ] Proper collisions
+- [ ] UI
 - [X] Scale map to 16x16
 - [X] 2D minimap for gun mode
 - [X] Add basic floor/ceiling - **Just a matching png for now**
-- [ ] Binary textures
+- [ ] Binary textures **wip**
 - [ ] Up/down parallax/Y-xhearing
 - [ ] Ebiten Audio mp3 sound support
 - [ ] Weapon swap/shield

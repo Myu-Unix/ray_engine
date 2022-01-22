@@ -47,18 +47,42 @@ func keyboard_handling() {
 		if ebiten.IsKeyPressed(ebiten.KeyUp) || ebiten.IsKeyPressed(ebiten.KeyW) { // Z Azerty
 			player_pos_x = player_pos_x + player_delta_x
 			player_pos_y = player_pos_y + player_delta_y
+			// small bobbing
+			if guny >= 350 && guny < 386 {
+				guny += 12
+			} else {
+				guny = 350
+			}
 		}
 		if ebiten.IsKeyPressed(ebiten.KeyDown) || ebiten.IsKeyPressed(ebiten.KeyS) { // S
 			player_pos_x = player_pos_x - player_delta_x
 			player_pos_y = player_pos_y - player_delta_y
+			// small bobbing
+			if guny >= 314 && guny <= 350 {
+				guny -= 12
+			} else {
+				guny = 350
+			}
 		}
 		if ebiten.IsKeyPressed(ebiten.KeyLeft) || ebiten.IsKeyPressed(ebiten.KeyA) { // Q Azerty
 			player_pos_x = player_pos_x - player_strafe_delta_x
 			player_pos_y = player_pos_y - player_strafe_delta_y
+			// small bobbing
+			if gunx > 476 && gunx <= 512 {
+				gunx -= 12
+			} else {
+				gunx = 512
+			}
 		}
 		if ebiten.IsKeyPressed(ebiten.KeyRight) || ebiten.IsKeyPressed(ebiten.KeyD) { // D
 			player_pos_x = player_pos_x + player_strafe_delta_x
 			player_pos_y = player_pos_y + player_strafe_delta_y
+			// small bobbing
+			if gunx >= 512 && gunx < 548 {
+				gunx += 12
+			} else {
+				gunx = 512
+			}
 		}
 	}
 	if IsKeyTriggered(ebiten.KeyM) {
