@@ -12,14 +12,14 @@ _2D map rendered in 3D_
 
 ![img](other_imgs/screenie.png)
 
-_CRT scanlines-
+_CRT scanlines_
 
 ![img](other_imgs/screenie_crt.png)
 
 
 #### Build & run
 
-Build with Go 1.16 and Ebiten v2 on Linux
+Build with Go 1.16 and Ebiten v2 on Linux/macOS
 
      go build
     ./ray_engine
